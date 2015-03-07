@@ -10,12 +10,11 @@
 #include <errno.h>
 #include <sys/epoll.h>
 
+#include "utils.h"
+
 EventLoop::EventLoop() {
     epoll_fd = epoll_create1(0);
-    if (epoll_fd < 0) {
-        perror("epoll_create1");
-        exit(1);
-    }
+    check_fd(epoll_fd, "epoll_create1");
 }
 
 void EventLoop::run() noexcept {
@@ -67,6 +66,6 @@ void EventLoop::add_fd(Widget *widget, int fd) noexcept {
 
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) < 0) {
         perror("epoll_ctl(..., EPOLL_CTL_ADD, ...)");
-        exit(1);
+        abort();
     }
 }

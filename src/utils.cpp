@@ -1,16 +1,16 @@
 #include "utils.h"
 
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cassert>
 
-int create_timerfd(int clockid, const struct timespec *interval)
+#include <errno.h>
+#include <unistd.h>
+
+int create_timerfd_inner(int clockid, const struct timespec *interval)
 {
     int res = timerfd_create(clockid, TFD_NONBLOCK | TFD_CLOEXEC);
-    if (res < 0) {
-        perror("timerfd_create");
-        exit(1);
-    }
+    check_fd(res, "timerfd_create"); 
 
     struct itimerspec new_val;
     new_val.it_interval = *interval;
@@ -18,24 +18,41 @@ int create_timerfd(int clockid, const struct timespec *interval)
 
     if (timerfd_settime(res, 0, &new_val, nullptr) < 0) {
         perror("timerfd_settime");
-        exit(1);
+        abort();
     }
 
     return res;
 }
 
-int create_timerfd_seconds(int clockid, time_t seconds)
+uint64_t consume_timerfd(int timerfd) noexcept
 {
-    struct timespec interval;
-    interval.tv_sec = seconds;
-    interval.tv_nsec = 0;
-    return create_timerfd(clockid, &interval);
+    uint64_t total_num_of_expirations = 0;
+    for (;;) {
+        uint64_t num_of_expirations;
+        ssize_t res = read(timerfd, &num_of_expirations, sizeof(num_of_expirations));
+
+        if (res < 0) {
+            if (errno == EAGAIN) break;
+            perror("WidgetTime, read(timerfd)");
+            abort();
+        }
+
+        if (res != sizeof(num_of_expirations)) {
+            fprintf(stderr, "Unexpected read from timerfd: %zd\n", res);
+            abort();
+        }
+    
+        assert(num_of_expirations > 0);
+
+        total_num_of_expirations += num_of_expirations;
+    }
+
+    return total_num_of_expirations;
 }
 
-int create_timerfd_nano(int clockid, long nanoseconds)
-{
-    struct timespec interval;
-    interval.tv_sec = 0;
-    interval.tv_nsec = nanoseconds;
-    return create_timerfd(clockid, &interval);
+void check_fd(int fd, const char *perror_arg) noexcept {
+    if (fd < 0) {
+        perror(perror_arg);
+        abort();
+    }
 }

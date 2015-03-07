@@ -14,7 +14,7 @@ static const char * const FORMAT_STRING =
     "{\"full_text\": \"%T\"}";
 
 WidgetTime::WidgetTime(EventLoop &event_loop) {
-    timerfd = create_timerfd_milli(CLOCK_REALTIME, 500);
+    timerfd = create_timerfd(CLOCK_REALTIME, std::chrono::milliseconds(500));
     event_loop.add_fd(this, timerfd);
 
     update_string();
@@ -26,12 +26,12 @@ void WidgetTime::update_string() noexcept {
 
     if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
         perror("clock_gettime");
-        exit(1);
+        abort();
     }
 
     if (localtime_r(&tp.tv_sec, &result) == nullptr) {
         perror("localtime_r");
-        exit(1);
+        abort();
     }
 
     strftime(buffer, sizeof(buffer), FORMAT_STRING, &result);
@@ -42,21 +42,6 @@ const char * WidgetTime::get_string() const noexcept {
 }
 
 void WidgetTime::descriptor_ready() noexcept {
-    for (;;) {
-        uint64_t num_of_expirations;
-        ssize_t res = read(timerfd, &num_of_expirations, sizeof(num_of_expirations));
-
-        if (res < 0) {
-            if (errno == EAGAIN) break;
-            perror("WidgetTime, read(timerfd)");
-            exit(1);
-        }
-
-        if (res != sizeof(num_of_expirations)) {
-            fprintf(stderr, "Unexpected read from timerfd: %zd\n", res);
-            exit(1);
-        }
-
-        update_string();
-    }
+    consume_timerfd(timerfd);
+    update_string();
 }
