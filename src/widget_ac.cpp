@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #include <errno.h>
 #include <unistd.h>
@@ -29,12 +30,46 @@ static bool is_connected(int ac_dirfd) {
     return online != 0;
 }
 
-WidgetAC::WidgetAC(EventLoop &event_loop, const char *ac_name) {
+/*
+ * This function essentially reads a link in
+ * /sys/class/power_supply, and preprocesses it to the format
+ * that udev uses
+ */
+static const char * get_device_name(const char *symlink_name) {
+    char path[256];
+    const char *device_name;
+    ssize_t res;
+
+    res = readlinkat(CachedPathDescriptors::get_sysclasspowersupply(), symlink_name, path, sizeof(path));
+
+    if (res < 0) {
+        perror("readlinkat");
+        abort();
+    }
+
+    if (size_t(res) >= sizeof(path) - 1) {
+        fprintf(stderr, "readlinkat: path is too large\n");
+        abort();
+    }
+
+    path[res] = '\0'; // readlink doesn't put a null terminator
+
+    device_name = strstr(path, "/devices/");
+    if (device_name == nullptr) {
+        fprintf(stderr, "couldn't find device part in %s\n", path);
+        abort();
+    }
+
+    return strdup(device_name);
+}
+
+WidgetAC::WidgetAC(EventLoop &event_loop, UdevMonitor &udev_monitor, const char *ac_name) {
     this->ac_name = ac_name;
     
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::seconds(5));
-    event_loop.add_fd(this, timerfd);
+    full_device_name = get_device_name(ac_name);
 
+    udev_monitor.add_listener(this);
+    
     update_string();
 }
 
@@ -49,7 +84,7 @@ void WidgetAC::update_string() noexcept {
         exit(1);
     }
 
-    bool is_online = dirfd_ac && is_connected(dirfd_ac);
+    bool is_online = dirfd_ac >= 0 && is_connected(dirfd_ac);
 
     snprintf(buffer, sizeof(buffer), "{\"full_text\": \"[" VOLTAGE_SYMBOL "]\", \"color\": \"%s\"}", is_online ? COLOR_ONLINE : COLOR_OFFLINE);
 
@@ -61,6 +96,13 @@ const char * WidgetAC::get_string() const noexcept {
 }
 
 void WidgetAC::descriptor_ready() noexcept {
-    consume_timerfd(timerfd);
-    update_string();
+    abort();
+}
+
+void WidgetAC::udev_event(struct udev_device *udev_device) noexcept {
+    const char *event_device_name = udev_device_get_devpath(udev_device);
+
+    if (strcmp(event_device_name, full_device_name) == 0) {
+        update_string();
+    }
 }

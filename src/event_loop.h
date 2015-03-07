@@ -2,8 +2,15 @@
 
 #include <vector>
 
-// forward declaration
-class Widget;
+class Epollable {
+public:
+    virtual void descriptor_ready() noexcept = 0;
+};
+
+class Widget : public Epollable {
+public:
+    virtual const char* get_string(void) const noexcept = 0;
+};
 
 class EventLoop {
     int epoll_fd;
@@ -13,7 +20,7 @@ class EventLoop {
 public:
     EventLoop();
 
-    void add_fd(Widget *widget, int fd) noexcept;
+    void add_fd(Epollable *widget, int fd) noexcept;
     void remove_fd(int fd) noexcept;
 
     void run() noexcept;
@@ -21,8 +28,4 @@ public:
     void add_widget(Widget *widget) noexcept;
 };
 
-class Widget {
-public:
-    virtual const char* get_string(void) const noexcept = 0;
-    virtual void descriptor_ready() noexcept = 0;
-};
+

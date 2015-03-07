@@ -27,8 +27,8 @@ void EventLoop::run() noexcept {
         int nevents = epoll_wait(epoll_fd, events.begin(), events.size(), -1);
 
         for (int i = 0; i < nevents; i++) {
-            Widget *widget = (Widget *) events[i].data.ptr;
-            widget->descriptor_ready();
+            Epollable *epollable = (Epollable *) events[i].data.ptr;
+            epollable->descriptor_ready();
         }
 
         if (nevents > 0) {
@@ -63,10 +63,10 @@ void EventLoop::add_widget(Widget *widget) noexcept {
     widgets.push_back(widget);
 }
 
-void EventLoop::add_fd(Widget *widget, int fd) noexcept {
+void EventLoop::add_fd(Epollable *epollable, int fd) noexcept {
     struct epoll_event event;
 
-    event.data.ptr = widget;
+    event.data.ptr = epollable;
     event.events = EPOLLIN;
 
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) < 0) {

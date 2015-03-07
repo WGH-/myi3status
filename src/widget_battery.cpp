@@ -31,7 +31,7 @@ static float get_battery_level(int battery_dirfd) {
 WidgetBattery::WidgetBattery(EventLoop &event_loop, const char *battery_name) {
     this->battery_name = battery_name;
 
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::seconds(5));
+    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::seconds(15));
     event_loop.add_fd(this, timerfd);
 
     update_string();

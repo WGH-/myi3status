@@ -12,3 +12,5 @@ if (CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 add_executable(myi3status ${sources})
+
+target_link_libraries(myi3status udev)

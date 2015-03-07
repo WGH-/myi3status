@@ -1,15 +1,17 @@
 #pragma once
 
 #include "event_loop.h"
+#include "udev.h"
 
-class WidgetAC : public Widget {
+class WidgetAC : public Widget, public UdevListener {
     const char *ac_name;
-    int timerfd;
+    const char *full_device_name; // as used by udev & co
 
     void update_string() noexcept;
     char buffer[64];
 public:
-    WidgetAC(EventLoop &event_loop, const char *ac_name);
+    WidgetAC(EventLoop &event_loop, UdevMonitor &udev_monitor, const char *ac_name);
     virtual const char* get_string(void) const noexcept override;
     virtual void descriptor_ready() noexcept override;
+    virtual void udev_event(struct udev_device *udev_device) noexcept override;
 };
