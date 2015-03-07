@@ -26,3 +26,5 @@ inline int create_timerfd(int clockid, const struct timespec *interval) {
 uint64_t consume_timerfd(int fd) noexcept;
 
 void check_fd(int fd, const char *perror_arg = nullptr) noexcept;
+
+unsigned long read_ulong_from_file(int fd) noexcept;

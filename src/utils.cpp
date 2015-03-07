@@ -56,3 +56,33 @@ void check_fd(int fd, const char *perror_arg) noexcept {
         abort();
     }
 }
+
+unsigned long read_ulong_from_file(int fd) noexcept {
+    char buffer[64]; // should be sufficient for everything
+    char *endptr;
+    unsigned long value;
+    ssize_t res;
+
+    res = read(fd, buffer, sizeof(buffer));
+
+    if (res < 0) {
+        perror("read");
+        abort();
+    }
+
+    if (buffer[res-1] != '\n') {
+        fprintf(stderr, "missing trailing newline\n");
+        abort();
+    }
+
+    buffer[res-1] = '\0';
+
+    value = strtoul(buffer, &endptr, 10);
+
+    if (endptr != &buffer[res-1]) {
+        fprintf(stderr, "strtoul conversion failed for '%s'\n", buffer);
+        abort();
+    }
+
+    return value;
+}

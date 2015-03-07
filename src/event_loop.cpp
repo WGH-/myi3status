@@ -20,8 +20,8 @@ EventLoop::EventLoop() {
 void EventLoop::run() noexcept {
     std::array<struct epoll_event, MAX_EVENTS> events;
 
-    puts("{\"version\":1}");
-    puts("["); // start of infinite list
+    fputs("{\"version\":1}\n", stdout);
+    fputs("[\n", stdout); // start of infinite list
 
     for (;;) {
         int nevents = epoll_wait(epoll_fd, events.begin(), events.size(), -1);
@@ -36,21 +36,26 @@ void EventLoop::run() noexcept {
         }
     }
 
-    puts("]"); // end of infinite list
+    fputs("]\n", stdout); // end of infinite list
 }
 
 void EventLoop::print_stuff() noexcept {
-    puts("[");
+    putchar('[');
     bool need_comma = false;
     for (Widget *widget : widgets) {
+        const char *s = widget->get_string();
+
+        if (!s || !s[0]) continue;
+
         if (need_comma) {
             putchar(',');
         } else {
             need_comma = true;
         }
-        puts(widget->get_string());
+
+        fputs(s, stdout);
     }
-    puts("],");
+    fputs("],\n", stdout);
     fflush(stdout);
 }
 
