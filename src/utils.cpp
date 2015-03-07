@@ -26,28 +26,23 @@ int create_timerfd_inner(int clockid, const struct timespec *interval)
 
 uint64_t consume_timerfd(int timerfd) noexcept
 {
-    uint64_t total_num_of_expirations = 0;
-    for (;;) {
-        uint64_t num_of_expirations;
-        ssize_t res = read(timerfd, &num_of_expirations, sizeof(num_of_expirations));
+    uint64_t num_of_expirations;
+    ssize_t res = read(timerfd, &num_of_expirations, sizeof(num_of_expirations));
 
-        if (res < 0) {
-            if (errno == EAGAIN) break;
-            perror("WidgetTime, read(timerfd)");
-            abort();
-        }
-
-        if (res != sizeof(num_of_expirations)) {
-            fprintf(stderr, "Unexpected read from timerfd: %zd\n", res);
-            abort();
-        }
-    
-        assert(num_of_expirations > 0);
-
-        total_num_of_expirations += num_of_expirations;
+    if (res < 0) {
+        if (errno == EAGAIN) return 0;;
+        perror("WidgetTime, read(timerfd)");
+        abort();
     }
 
-    return total_num_of_expirations;
+    if (res != sizeof(num_of_expirations)) {
+        fprintf(stderr, "Unexpected read from timerfd: %zd\n", res);
+        abort();
+    }
+
+    assert(num_of_expirations > 0);
+
+    return num_of_expirations;
 }
 
 void check_fd(int fd, const char *perror_arg) noexcept {
