@@ -6,7 +6,7 @@ class WidgetTime : public Widget {
     int timerfd;
     void update_string() noexcept;
 
-    char buffer[32];
+    char buffer[64];
 public:
     WidgetTime(EventLoop &event_loop);
     virtual const char* get_string(void) const noexcept override;

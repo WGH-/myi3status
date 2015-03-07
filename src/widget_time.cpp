@@ -11,7 +11,7 @@
 #include "utils.h"
 
 static const char * const FORMAT_STRING = 
-    "{\"full_text\": \"%T\"}";
+    "{\"full_text\": \"%F %H:%M\"}";
 
 WidgetTime::WidgetTime(EventLoop &event_loop) {
     timerfd = create_timerfd(CLOCK_REALTIME, std::chrono::milliseconds(500));
@@ -23,6 +23,7 @@ WidgetTime::WidgetTime(EventLoop &event_loop) {
 void WidgetTime::update_string() noexcept {
     struct timespec tp;
     struct tm result;
+    size_t res;
 
     if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
         perror("clock_gettime");
@@ -34,7 +35,11 @@ void WidgetTime::update_string() noexcept {
         abort();
     }
 
-    strftime(buffer, sizeof(buffer), FORMAT_STRING, &result);
+    res = strftime(buffer, sizeof(buffer), FORMAT_STRING, &result);
+    if (res == 0) {
+        fprintf(stderr, "strftime failed\n");
+        abort();
+    }
 }
 
 const char * WidgetTime::get_string() const noexcept {
