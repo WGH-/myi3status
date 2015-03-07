@@ -95,10 +95,6 @@ const char * WidgetAC::get_string() const noexcept {
     return buffer;
 }
 
-void WidgetAC::descriptor_ready() noexcept {
-    abort();
-}
-
 void WidgetAC::udev_event(struct udev_device *udev_device) noexcept {
     const char *event_device_name = udev_device_get_devpath(udev_device);
 

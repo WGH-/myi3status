@@ -2,7 +2,7 @@
 
 #include "event_loop.h"
 
-class WidgetBattery : public Widget {
+class WidgetBattery : public Widget, Epollable {
     int timerfd;
     const char *battery_name;
 

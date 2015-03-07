@@ -2,7 +2,7 @@
 
 #include "event_loop.h"
 
-class WidgetTime : public Widget {
+class WidgetTime : public Widget, Epollable {
     int timerfd;
     void update_string() noexcept;
 

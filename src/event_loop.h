@@ -7,7 +7,7 @@ public:
     virtual void descriptor_ready() noexcept = 0;
 };
 
-class Widget : public Epollable {
+class Widget {
 public:
     virtual const char* get_string(void) const noexcept = 0;
 };
