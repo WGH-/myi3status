@@ -21,6 +21,5 @@ public:
     UdevMonitor(EventLoop &event_loop);
 
     virtual void descriptor_ready() noexcept override;
-
     void add_listener(UdevListener *listener);
 };

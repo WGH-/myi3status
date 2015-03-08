@@ -14,7 +14,7 @@ static const char * const FORMAT_STRING =
     "{\"full_text\": \"%F %H:%M\"}";
 
 WidgetTime::WidgetTime(EventLoop &event_loop) {
-    timerfd = create_timerfd(CLOCK_REALTIME, std::chrono::milliseconds(500));
+    timerfd = create_timerfd(CLOCK_REALTIME, std::chrono::seconds(10));
     event_loop.add_fd(this, timerfd);
 
     update_string();

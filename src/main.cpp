@@ -2,8 +2,10 @@
 #include <unistd.h>
 
 #include "event_loop.h"
+#include "nl80211.h"
 #include "udev.h"
 
+#include "widget_nl80211.h"
 #include "widget_time.h"
 #include "widget_battery.h"
 #include "widget_ac.h"
@@ -12,15 +14,17 @@ int main(void) {
     EventLoop event_loop;
 
     UdevMonitor udev_monitor(event_loop);
+    Nl80211 nl80211(event_loop);
 
 #define NEW_WIDGET(CLASS, VARNAME, ...) \
-    CLASS VARNAME{event_loop, __VA_ARGS__}; \
+    CLASS VARNAME{__VA_ARGS__}; \
     event_loop.add_widget(&VARNAME)
 
-    NEW_WIDGET(WidgetAC, widget_ac, udev_monitor, "AC");
-    NEW_WIDGET(WidgetBattery, widget_battery0, "BAT0");
-    NEW_WIDGET(WidgetBattery, widget_battery1, "BAT1");
-    NEW_WIDGET(WidgetTime, widget_time);
+    NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, "wlp3s0");
+    NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
+    NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
+    NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1");
+    NEW_WIDGET(WidgetTime, widget_time, event_loop);
 
     event_loop.run();
 

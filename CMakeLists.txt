@@ -13,4 +13,17 @@ endif()
 
 add_executable(myi3status ${sources})
 
+find_library(LIBNL_LIBRARY nl-3)
+find_library(LIBNL_GENL_LIBRARY nl-genl-3)
+
+find_path(LIBNL_INCLUDE_DIR
+    NAMES
+    netlink/netlink.h
+    PATH_SUFFIXES
+    libnl3
+)
+
 target_link_libraries(myi3status udev)
+target_link_libraries(myi3status ${LIBNL_LIBRARY} ${LIBNL_GENL_LIBRARY})
+
+include_directories(${LIBNL_INCLUDE_DIR})

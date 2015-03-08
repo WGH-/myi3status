@@ -23,6 +23,9 @@ void EventLoop::run() noexcept {
     fputs("{\"version\":1}\n", stdout);
     fputs("[\n", stdout); // start of infinite list
 
+    // always print the first "update" immediately
+    print_stuff();
+
     for (;;) {
         int nevents = epoll_wait(epoll_fd, events.begin(), events.size(), -1);
 
