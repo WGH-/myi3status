@@ -16,8 +16,7 @@ class Widget_nl80211 : public Widget, Nl80211Listener, Rtnetlink::LinkListener {
     Rtnetlink &rtnetlink;
     Rtnetlink::LinkInfo link_info;
 
-    void get_updated_info() noexcept;
-    void update_string() noexcept;
+    void update_string(struct rtnl_link *link = nullptr) noexcept;
 public:
     Widget_nl80211(Nl80211 &nl80211, Rtnetlink &rtnetlink, const char *ifname);
 

@@ -27,7 +27,7 @@ Widget_nl80211::Widget_nl80211(Nl80211 &nl80211, Rtnetlink &rtnetlink, const cha
     update_string();
 }
 
-void Widget_nl80211::update_string() noexcept {
+void Widget_nl80211::update_string(struct rtnl_link *link) noexcept {
     rtnetlink.get_link_info(ifname, link_info);
     nl80211.get_interface_info(ifname, info);
 
