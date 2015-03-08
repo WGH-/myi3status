@@ -3,6 +3,7 @@
 
 #include "event_loop.h"
 #include "nl80211.h"
+#include "rtnetlink.h"
 #include "udev.h"
 
 #include "widget_nl80211.h"
@@ -15,12 +16,13 @@ int main(void) {
 
     UdevMonitor udev_monitor(event_loop);
     Nl80211 nl80211(event_loop);
+    Rtnetlink rtnetlink(event_loop);
 
 #define NEW_WIDGET(CLASS, VARNAME, ...) \
     CLASS VARNAME{__VA_ARGS__}; \
     event_loop.add_widget(&VARNAME)
 
-    NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, "wlp3s0");
+    NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, rtnetlink, "wlp3s0");
     NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
     NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
     NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1");

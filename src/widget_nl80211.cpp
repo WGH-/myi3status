@@ -4,27 +4,31 @@
 #include <cstdlib>
 #include <cctype>
 
-#include <net/if.h>
+// XXX hack (netlink/route/link.h conflicts with net/if.h)
+extern "C" char *if_indextoname (unsigned int __ifindex, char *__ifname);
 
 #include <linux/nl80211.h>
 
 #include <netlink/socket.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/ctrl.h>
+#include <netlink/route/link.h>
 
 #define DISCONNECTED_COLOR "#FF0000"
 
-Widget_nl80211::Widget_nl80211(Nl80211 &nl80211, const char *ifname)
-    : nl80211(nl80211)
+Widget_nl80211::Widget_nl80211(Nl80211 &nl80211, Rtnetlink &rtnetlink, const char *ifname)
+    : nl80211(nl80211), rtnetlink(rtnetlink)
 {
     this->ifname = ifname;
     
     nl80211.add_listener(this);
+    rtnetlink.add_link_listener(this);
 
     update_string();
 }
 
 void Widget_nl80211::update_string() noexcept {
+    rtnetlink.get_link_info(ifname, link_info);
     nl80211.get_interface_info(ifname, info);
 
     if (info.connected) {
@@ -33,11 +37,18 @@ void Widget_nl80211::update_string() noexcept {
             info.ssid_filtered
         );
     } else {
+        const char *status = "disconnected";
+
+        if (!(link_info.iff_flags & IFF_UP)) {
+            status = "down";
+        }
+
         snprintf(string, sizeof(string), 
             "{"
-                "\"full_text\": \"(disconnected)\","
+                "\"full_text\": \"(%s)\","
                 "\"color\": \"" DISCONNECTED_COLOR "\" "
-            "}"
+            "}",
+            status
         );
     }
 }
@@ -73,5 +84,11 @@ void Widget_nl80211::nl80211event(struct nl_msg *msg) noexcept {
             break;
         default:
             break;
+    }
+}
+
+void Widget_nl80211::link_event(struct rtnl_link *link) noexcept {
+    if (strcmp(rtnl_link_get_name(link), ifname) == 0) {
+        update_string();
     }
 }

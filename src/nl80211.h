@@ -35,7 +35,6 @@ class Nl80211 : public Epollable {
     // constructor helpers
     void create_event_sock(EventLoop &event_loop);
     void create_info_sock();
-
 public:
     struct InterfaceInfo {
         InterfaceInfo() {
