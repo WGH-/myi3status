@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <sys/timerfd.h>
 
 int create_timerfd_inner(int clockid, const struct timespec *interval);
 

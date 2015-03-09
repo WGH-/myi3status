@@ -97,7 +97,6 @@ void Rtnetlink::get_link_info(const char *ifname, LinkInfo &info, struct rtnl_li
         }
         borrowed_reference = false;
     } else {
-        fprintf(stderr, "reusing lol\n");
         borrowed_reference = true;
     }
 
