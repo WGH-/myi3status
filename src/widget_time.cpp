@@ -42,7 +42,10 @@ void WidgetTime::update_string() noexcept {
     }
 }
 
-const char * WidgetTime::get_string() const noexcept {
+const char * WidgetTime::get_string(bool force_update) noexcept {
+    if (force_update) {
+        update_string();
+    }
     return buffer;
 }
 

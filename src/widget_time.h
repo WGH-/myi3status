@@ -9,6 +9,6 @@ class WidgetTime : public Widget, Epollable {
     char buffer[64];
 public:
     WidgetTime(EventLoop &event_loop);
-    virtual const char* get_string(void) const noexcept override;
+    virtual const char* get_string(bool force_update) noexcept override;
     virtual void descriptor_ready() noexcept override;
 };

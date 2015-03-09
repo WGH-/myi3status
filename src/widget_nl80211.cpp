@@ -53,7 +53,8 @@ void Widget_nl80211::update_string(struct rtnl_link *link) noexcept {
     }
 }
 
-const char * Widget_nl80211::get_string() const noexcept {
+const char * Widget_nl80211::get_string(bool force_update) noexcept {
+    // no polling - no forced update
     return string;
 }
 

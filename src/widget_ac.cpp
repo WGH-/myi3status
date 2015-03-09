@@ -91,7 +91,8 @@ void WidgetAC::update_string() noexcept {
     close(dirfd_ac);
 }
 
-const char * WidgetAC::get_string() const noexcept {
+const char * WidgetAC::get_string(bool force_update) noexcept {
+    // this one doesn't do polling, so no need to forcibly update
     return buffer;
 }
 

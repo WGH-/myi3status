@@ -58,7 +58,10 @@ void WidgetBattery::update_string() noexcept {
     close(dirfd_battery);
 }
 
-const char * WidgetBattery::get_string() const noexcept {
+const char * WidgetBattery::get_string(bool force_update) noexcept {
+    if (force_update) {
+        update_string();
+    }
     return buffer;
 }
 

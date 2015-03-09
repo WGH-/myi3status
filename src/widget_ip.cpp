@@ -41,8 +41,10 @@ void Widget_IP::update_string() noexcept {
     }
 }
 
-const char* Widget_IP::get_string(void) const noexcept
+const char* Widget_IP::get_string(bool force_update) noexcept
 {
+    // this widget doesn't use polling, so string is always relevant
+
     return string;
 }
 

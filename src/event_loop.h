@@ -9,7 +9,7 @@ public:
 
 class Widget {
 public:
-    virtual const char* get_string(void) const noexcept = 0;
+    virtual const char* get_string(bool force_update = false) noexcept = 0;
 };
 
 class EventLoop {

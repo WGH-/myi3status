@@ -20,7 +20,7 @@ class Widget_nl80211 : public Widget, Nl80211Listener, Rtnetlink::LinkListener {
 public:
     Widget_nl80211(Nl80211 &nl80211, Rtnetlink &rtnetlink, const char *ifname);
 
-    virtual const char* get_string(void) const noexcept override;
+    virtual const char* get_string(bool force_update) noexcept override;
     virtual void nl80211event(struct nl_msg *msg) noexcept override;
     virtual void link_event(struct rtnl_link *link) noexcept override;
 };
