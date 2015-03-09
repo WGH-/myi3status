@@ -26,6 +26,9 @@ void EventLoop::run() noexcept {
     // always print the first "update" immediately
     print_stuff();
 
+    SignalFd signalFdUsr1(*this, {SIGUSR1});
+    signalFdUsr1.add_listener(this);
+
     for (;;) {
         int nevents = epoll_wait(epoll_fd, events.begin(), events.size(), -1);
 
@@ -42,11 +45,15 @@ void EventLoop::run() noexcept {
     fputs("]\n", stdout); // end of infinite list
 }
 
-void EventLoop::print_stuff() noexcept {
+void EventLoop::print_stuff(bool force_update) noexcept {
     putchar('[');
     bool need_comma = false;
+    
+    force_update = false;
+
     for (Widget *widget : widgets) {
-        const char *s = widget->get_string();
+        const char *s = widget->get_string(force_next_update);
+        force_next_update = false;
 
         if (!s || !s[0]) continue;
 
@@ -60,6 +67,12 @@ void EventLoop::print_stuff() noexcept {
     }
     fputs("],\n", stdout);
     fflush(stdout);
+}
+    
+void EventLoop::received_signal(const struct signalfd_siginfo *siginfo) noexcept {
+    if (siginfo->ssi_signo == SIGUSR1) {
+        force_next_update = true;
+    }
 }
 
 void EventLoop::add_widget(Widget *widget) noexcept {

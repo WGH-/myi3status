@@ -7,16 +7,21 @@ public:
     virtual void descriptor_ready() noexcept = 0;
 };
 
+class EventLoop;
+
+#include "signalfd.h"
+
 class Widget {
 public:
     virtual const char* get_string(bool force_update = false) noexcept = 0;
 };
 
-class EventLoop {
+class EventLoop : SignalFdListener {
     int epoll_fd;
     std::vector<Widget*> widgets;
-
-    void print_stuff() noexcept;
+    
+    bool force_next_update;
+    void print_stuff(bool force_update = false) noexcept;
 public:
     EventLoop();
 
@@ -26,6 +31,8 @@ public:
     void run() noexcept;
 
     void add_widget(Widget *widget) noexcept;
+
+    virtual void received_signal(const struct signalfd_siginfo *) noexcept override;
 };
 
 
