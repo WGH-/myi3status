@@ -17,6 +17,8 @@ find_library(LIBNL_LIBRARY nl-3)
 find_library(LIBNL_GENL_LIBRARY nl-genl-3)
 find_library(LIBNL_ROUTE_LIBRARY nl-route-3)
 
+find_package(ALSA)
+
 find_path(LIBNL_INCLUDE_DIR
     NAMES
     netlink/netlink.h
@@ -25,6 +27,13 @@ find_path(LIBNL_INCLUDE_DIR
 )
 
 target_link_libraries(myi3status udev)
-target_link_libraries(myi3status ${LIBNL_LIBRARY} ${LIBNL_GENL_LIBRARY} ${LIBNL_ROUTE_LIBRARY})
+target_link_libraries(myi3status 
+    ${LIBNL_LIBRARY} 
+    ${LIBNL_GENL_LIBRARY}
+    ${LIBNL_ROUTE_LIBRARY} 
+    ${ALSA_LIBRARY})
 
-include_directories(${LIBNL_INCLUDE_DIR})
+include_directories(
+    ${LIBNL_INCLUDE_DIR}
+    ${ALSA_INCLUDE_DIR}    
+)

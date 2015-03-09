@@ -11,6 +11,7 @@
 #include "widget_time.h"
 #include "widget_battery.h"
 #include "widget_ac.h"
+#include "widget_alsa.h"
 
 int main(void) {
     EventLoop event_loop;
@@ -28,6 +29,7 @@ int main(void) {
     NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
     NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
     NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1");
+    NEW_WIDGET(Widget_ALSA, wiget_alsa, event_loop);
     NEW_WIDGET(WidgetTime, widget_time, event_loop);
 
     event_loop.run();
