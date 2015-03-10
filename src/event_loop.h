@@ -21,7 +21,7 @@ class EventLoop : SignalFdListener {
     std::vector<Widget*> widgets;
     
     bool force_next_update;
-    void print_stuff(bool force_update = false) noexcept;
+    void print_stuff() noexcept;
 public:
     EventLoop();
 

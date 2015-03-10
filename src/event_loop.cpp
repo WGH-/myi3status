@@ -15,6 +15,8 @@
 EventLoop::EventLoop() {
     epoll_fd = epoll_create1(0);
     check_fd(epoll_fd, "epoll_create1");
+    
+    force_next_update = false;
 }
 
 void EventLoop::run() noexcept {
@@ -45,15 +47,12 @@ void EventLoop::run() noexcept {
     fputs("]\n", stdout); // end of infinite list
 }
 
-void EventLoop::print_stuff(bool force_update) noexcept {
+void EventLoop::print_stuff() noexcept {
     putchar('[');
     bool need_comma = false;
-    
-    force_update = false;
 
     for (Widget *widget : widgets) {
         const char *s = widget->get_string(force_next_update);
-        force_next_update = false;
 
         if (!s || !s[0]) continue;
 
@@ -65,6 +64,7 @@ void EventLoop::print_stuff(bool force_update) noexcept {
 
         fputs(s, stdout);
     }
+    force_next_update = false;
     fputs("],\n", stdout);
     fflush(stdout);
 }
