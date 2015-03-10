@@ -52,7 +52,7 @@ void WidgetBattery::update_string() noexcept {
     }
 
     if (dirfd_battery >= 0) {
-        snprintf(buffer, sizeof(buffer), "{\"full_text\": \"%s: %2.0f%%\"}", battery_name, get_battery_level(dirfd_battery) * 100);
+        snprintf(buffer, sizeof(buffer), "{\"full_text\": \"%s: %3.0f%%\"}", battery_name, get_battery_level(dirfd_battery) * 100);
     }
 
     close(dirfd_battery);

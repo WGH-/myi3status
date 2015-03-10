@@ -126,7 +126,7 @@ void Widget_ALSA::update_string() noexcept
 {
     if (volume >= 0) {
         snprintf(string, sizeof(string),
-            "{\"full_text\": \"VOL %3.0f%%\"}",
+            "{\"full_text\": \"VOL: %3.0f%%\"}",
             volume * 100
         );
     } else {
