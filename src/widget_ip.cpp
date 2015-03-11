@@ -7,12 +7,14 @@ extern "C" char *if_indextoname (unsigned int __ifindex, char *__ifname);
 
 #include <netlink/route/addr.h>
 
-#define IP_GOOD_COLOR "#00aa00"
+#define IP_DEFAULT_COLOR "#00aa00"
 
-Widget_IP::Widget_IP(Rtnetlink &rtnetlink, const char *ifname)
+Widget_IP::Widget_IP(Rtnetlink &rtnetlink, const char *ifname, const char *color)
     : rtnetlink(rtnetlink)
 {
     this->ifname = ifname;
+    
+    this->color = color ? color : IP_DEFAULT_COLOR;
     
     rtnetlink.add_addr_listener(this);
     rtnetlink.force_addr_update();
@@ -34,9 +36,9 @@ void Widget_IP::update_string() noexcept {
         snprintf(string, sizeof(string), 
             "{"
                 "\"full_text\": \"%s\","
-                "\"color\": \"" IP_GOOD_COLOR "\""
+                "\"color\": \"%s\""
             "}",
-            buffer
+            buffer, color
         );
     }
 }

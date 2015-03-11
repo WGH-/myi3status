@@ -24,7 +24,8 @@ int main(void) {
     CLASS VARNAME{__VA_ARGS__}; \
     event_loop.add_widget(&VARNAME)
 
-    NEW_WIDGET(Widget_IP, widget_wlp3s0_ip, rtnetlink, "wlp3s0");
+    NEW_WIDGET(Widget_IP, widget_ctfvpn_ip, rtnetlink, "ctfvpn", "#ff7f00");
+    NEW_WIDGET(Widget_IP, widget_wlp3s0_ip, rtnetlink, "wlp3s0", "#008b8b");
     NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, rtnetlink, "wlp3s0");
     NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
     NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
