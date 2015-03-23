@@ -8,16 +8,21 @@
 #include <unistd.h>
 #include <sys/timerfd.h>
 
-int create_timerfd_inner(int clockid, const struct timespec *interval)
+int create_timerfd_inner(int clockid, const struct timespec *interval, const struct timespec *value, bool absolute)
 {
     int res = timerfd_create(clockid, TFD_NONBLOCK | TFD_CLOEXEC);
     check_fd(res, "timerfd_create"); 
 
     struct itimerspec new_val;
     new_val.it_interval = *interval;
-    new_val.it_value = *interval;
+    new_val.it_value = *value;
 
-    if (timerfd_settime(res, 0, &new_val, nullptr) < 0) {
+    int settime_flags = 0;
+    if (absolute) {
+        settime_flags |= TFD_TIMER_ABSTIME;
+    }
+
+    if (timerfd_settime(res, settime_flags, &new_val, nullptr) < 0) {
         perror("timerfd_settime");
         abort();
     }
