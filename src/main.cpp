@@ -10,6 +10,7 @@
 #include "widget_nl80211.h"
 #include "widget_time.h"
 #include "widget_battery.h"
+#include "widget_wattage.h"
 #include "widget_ac.h"
 #include "widget_alsa.h"
 
@@ -28,6 +29,7 @@ int main(void) {
     NEW_WIDGET(Widget_IP, widget_wlp3s0_ip, rtnetlink, "wlp3s0", "#008b8b");
     NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, rtnetlink, "wlp3s0");
     NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
+    NEW_WIDGET(WidgetWattage, widget_wattage, event_loop, {"BAT0", "BAT1"});
     NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
     NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1");
     NEW_WIDGET(Widget_ALSA, wiget_alsa, event_loop);
