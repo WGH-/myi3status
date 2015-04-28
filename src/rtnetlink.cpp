@@ -126,6 +126,11 @@ void Rtnetlink::fill_addr_info(AddrInfo &info, struct rtnl_addr *addr)
         }
     }
     if (msgtype == RTM_NEWADDR) {
+        if (!info.invalid && (ipv4->s_addr & 0x0000fea9) == 0x0000fea9) {
+            // ignore zeroconf ipv4 addresses
+            return;
+        }
+
         memcpy(&info.addr, ipv4, sizeof(info.addr));
         info.invalid = false;
     }
