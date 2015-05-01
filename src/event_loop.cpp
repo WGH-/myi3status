@@ -4,6 +4,7 @@
 
 #include <array>
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
@@ -81,12 +82,11 @@ void EventLoop::add_widget(Widget *widget) noexcept {
 
 void EventLoop::add_fd(Epollable *epollable, int fd) noexcept {
     struct epoll_event event;
+    int res;
 
     event.data.ptr = epollable;
     event.events = EPOLLIN;
 
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event) < 0) {
-        perror("epoll_ctl(..., EPOLL_CTL_ADD, ...)");
-        abort();
-    }
+    res = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event);
+    assert(res == 0);
 }

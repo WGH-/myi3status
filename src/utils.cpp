@@ -10,8 +10,9 @@
 
 int create_timerfd_inner(int clockid, const struct timespec *interval, const struct timespec *value, bool absolute)
 {
-    int res = timerfd_create(clockid, TFD_NONBLOCK | TFD_CLOEXEC);
-    check_fd(res, "timerfd_create"); 
+    int err;
+    int fd = timerfd_create(clockid, TFD_NONBLOCK | TFD_CLOEXEC);
+    check_fd(fd, "timerfd_create"); 
 
     struct itimerspec new_val;
     new_val.it_interval = *interval;
@@ -22,12 +23,10 @@ int create_timerfd_inner(int clockid, const struct timespec *interval, const str
         settime_flags |= TFD_TIMER_ABSTIME;
     }
 
-    if (timerfd_settime(res, settime_flags, &new_val, nullptr) < 0) {
-        perror("timerfd_settime");
-        abort();
-    }
+    err = timerfd_settime(fd, settime_flags, &new_val, nullptr);
+    assert(err == 0);
 
-    return res;
+    return fd;
 }
 
 uint64_t consume_timerfd(int timerfd) noexcept
@@ -37,25 +36,17 @@ uint64_t consume_timerfd(int timerfd) noexcept
 
     if (res < 0) {
         if (errno == EAGAIN) return 0;;
-        perror("WidgetTime, read(timerfd)");
-        abort();
+        assert(false);
     }
 
-    if (res != sizeof(num_of_expirations)) {
-        fprintf(stderr, "Unexpected read from timerfd: %zd\n", res);
-        abort();
-    }
-
+    assert(res == sizeof(num_of_expirations));
     assert(num_of_expirations > 0);
 
     return num_of_expirations;
 }
 
 void check_fd(int fd, const char *perror_arg) noexcept {
-    if (fd < 0) {
-        perror(perror_arg);
-        abort();
-    }
+    assert(fd >= 0);
 }
 
 unsigned long read_ulong_from_file(int fd) noexcept {
@@ -65,25 +56,15 @@ unsigned long read_ulong_from_file(int fd) noexcept {
     ssize_t res;
 
     res = read(fd, buffer, sizeof(buffer));
+    assert(res >= 0);
 
-    if (res < 0) {
-        perror("read");
-        abort();
-    }
-
-    if (buffer[res-1] != '\n') {
-        fprintf(stderr, "missing trailing newline\n");
-        abort();
-    }
+    assert(buffer[res-1] == '\n');
 
     buffer[res-1] = '\0';
 
     value = strtoul(buffer, &endptr, 10);
 
-    if (endptr != &buffer[res-1]) {
-        fprintf(stderr, "strtoul conversion failed for '%s'\n", buffer);
-        abort();
-    }
+    assert(endptr == &buffer[res-1] && "strtoul failed");
 
     return value;
 }

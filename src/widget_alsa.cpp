@@ -86,24 +86,15 @@ void Widget_ALSA::open_mixer(EventLoop &event_loop)
     selem_regopt.device = "default";
 
     err = snd_mixer_open(&__mixer, 0);
-    if (err < 0) {
-        fprintf(stderr, "couldn't open mixer: %s\n", snd_strerror(err));
-        abort();
-    }
+    assert(err == 0);
 
     err = snd_mixer_selem_register(__mixer, &selem_regopt, NULL);
-    if (err < 0) {
-        fprintf(stderr, "couldn't selem register (whatever that means): %s\n", snd_strerror(err));
-        abort();
-    }
+    assert(err == 0);
 
     snd_mixer_set_callback(__mixer, mixer_callback);
 
     err = snd_mixer_load(__mixer);
-    if (err < 0) {
-        fprintf(stderr, "couldn't load mixer controls: %s\n", snd_strerror(err));
-        abort();
-    }
+    assert(err == 0);
 
     int nfds = snd_mixer_poll_descriptors_count(__mixer);
 
@@ -111,11 +102,7 @@ void Widget_ALSA::open_mixer(EventLoop &event_loop)
     pollfds.resize(nfds);
     
     err = snd_mixer_poll_descriptors(__mixer, &pollfds[0], nfds);
-
-    if (err < 0) {
-        fprintf(stderr, "couldn't load mixer poll descriptors: %s\n", snd_strerror(err));
-        abort();
-    }
+    assert(err >= 0);
 
     for (const struct pollfd &pollfd : pollfds) {
         event_loop.add_fd(this, pollfd.fd);

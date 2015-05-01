@@ -1,5 +1,7 @@
 #include "rtnetlink.h"
 
+#include <cassert>
+
 #include <linux/rtnetlink.h>
 
 #include <netlink/route/link.h>
@@ -19,7 +21,7 @@ static void handle_event_obj(struct nl_object *obj, void *arg)
     }
 }
 
-int handle_event(struct nl_msg *msg, void *arg) 
+static int handle_event(struct nl_msg *msg, void *arg) 
 {
     Rtnetlink *inst = (Rtnetlink *) arg;
 
@@ -36,35 +38,29 @@ Rtnetlink::Rtnetlink(EventLoop &event_loop) {
 }
 
 void Rtnetlink::create_info_sock() {
+    int res;
+    
     nl_info_sock = nl_socket_alloc();
 
-    if (!nl_info_sock) {
-        fprintf(stderr, "couldn't allocate netlink socket\n");
-        abort();
-    }
+    assert(nl_info_sock != NULL);
     
     nl_socket_set_buffer_size(nl_info_sock, 8192, 8192);
 
-    if (nl_connect(nl_info_sock, NETLINK_ROUTE)) {
-        fprintf(stderr, "couldn't connect to netlink socket\n");
-        abort();
-    } 
+    res = nl_connect(nl_info_sock, NETLINK_ROUTE);
+    assert(res == 0);
 }
 
 void Rtnetlink::create_event_sock(EventLoop &event_loop) {
+    int res;
+
     nl_event_sock = nl_socket_alloc();
 
-    if (!nl_event_sock) {
-        fprintf(stderr, "couldn't allocate netlink socket\n");
-        abort();
-    }
+    assert(nl_event_sock != NULL);
     
     nl_socket_set_buffer_size(nl_event_sock, 8192, 8192);
 
-    if (nl_connect(nl_event_sock, NETLINK_ROUTE)) {
-        fprintf(stderr, "couldn't connect to netlink socket\n");
-        abort();
-    } 
+    res = nl_connect(nl_event_sock, NETLINK_ROUTE);
+    assert(res == 0);
     
     nl_socket_disable_seq_check(nl_event_sock);
     nl_socket_set_nonblocking(nl_event_sock);
@@ -89,12 +85,11 @@ void Rtnetlink::force_addr_update()
 void Rtnetlink::get_link_info(const char *ifname, LinkInfo &info, struct rtnl_link *link)
 {
     bool borrowed_reference;
+    int res;
 
     if (link == nullptr) {
-        if (rtnl_link_get_kernel(nl_info_sock, -1, ifname, &link) < 0) {
-            fprintf(stderr, "unable to get link info for %s\n", ifname);
-            abort();
-        }
+        res = rtnl_link_get_kernel(nl_info_sock, -1, ifname, &link);
+        assert(res >= 0);
         borrowed_reference = false;
     } else {
         borrowed_reference = true;

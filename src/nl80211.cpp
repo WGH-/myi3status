@@ -1,5 +1,6 @@
 #include "nl80211.h"
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <cctype>
@@ -24,18 +25,10 @@ static void add_to_multicast_group(struct nl_sock *nl_sock, const char *group_na
     int mcid, ret;
 
     mcid = nl_get_multicast_id(nl_sock, "nl80211", group_name);
-
-    if (mcid < 0) {
-        fprintf(stderr, "couldn't find multicast group %s\n", group_name);
-        abort();
-    }
+    assert(mcid >= 0);
 
     ret = nl_socket_add_membership(nl_sock, mcid);
-
-    if (ret) {
-        fprintf(stderr, "couldn't add membership for group %s\n", group_name);
-        abort();
-    }
+    assert(ret == 0);
 }
 
 static void handle_info_bss_ies(const unsigned char *data, size_t length, Nl80211::InterfaceInfo &info) noexcept
@@ -66,23 +59,18 @@ static void handle_info_bss_ies(const unsigned char *data, size_t length, Nl8021
 static void handle_info_bss(struct nlattr **tb, Nl80211::InterfaceInfo &info)
 {
     struct nlattr *bss[NL80211_BSS_MAX + 1];
+    int res;
 
-    if (nla_parse_nested(bss, NL80211_BSS_MAX,
-                         tb[NL80211_ATTR_BSS],
-                         bss_policy)) 
-    {
-        fprintf(stderr, "failed to parse nested attributes!\n");
-        abort();
-    }
+    res = nla_parse_nested(bss, NL80211_BSS_MAX,
+                           tb[NL80211_ATTR_BSS],
+                           bss_policy);
+    assert(res == 0);
     
     if (!bss[NL80211_BSS_STATUS] || !bss[NL80211_BSS_BSSID]) {
         return;
     }
 
-    if (nla_len(bss[NL80211_BSS_BSSID]) != ETH_ALEN) {
-        fprintf(stderr, "unexpected BSSID length\n");
-        abort();
-    }
+    assert(nla_len(bss[NL80211_BSS_BSSID]) == ETH_ALEN);
 
     memcpy(info.mac, nla_data(bss[NL80211_BSS_BSSID]), ETH_ALEN);
 
@@ -100,13 +88,11 @@ static void handle_info_bss(struct nlattr **tb, Nl80211::InterfaceInfo &info)
 
 static void handle_info_sta(struct nlattr **tb, Nl80211::InterfaceInfo &info) {
     struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
+    int res;
         
-    if (nla_parse_nested(sinfo, NL80211_STA_INFO_MAX,
-                         tb[NL80211_ATTR_STA_INFO], sta_policy))
-    {
-        fprintf(stderr, "failed to parse nested attributes!\n");
-        abort();
-    }
+    res = nla_parse_nested(sinfo, NL80211_STA_INFO_MAX,
+                           tb[NL80211_ATTR_STA_INFO], sta_policy);
+    assert(res == 0);
 
     info.signal_strength = 0;
     if (sinfo[NL80211_STA_INFO_SIGNAL]) {
@@ -155,19 +141,16 @@ Nl80211::~Nl80211() {
 }
 
 void Nl80211::create_event_sock(EventLoop &event_loop) {
-    nl_event_sock = nl_socket_alloc();
+    int res;
 
-    if (!nl_event_sock) {
-        fprintf(stderr, "couldn't allocate netlink socket\n");
-        abort();
-    }
+    nl_event_sock = nl_socket_alloc();
+    assert(nl_event_sock != 0);
 
     nl_socket_set_buffer_size(nl_event_sock, 8192, 8192);
 
-    if (genl_connect(nl_event_sock)) {
-        fprintf(stderr, "couldn't connect to netlink socket\n");
-        abort();
-    }
+
+    res = genl_connect(nl_event_sock);
+    assert(res == 0);
 
     add_to_multicast_group(nl_event_sock, "config");
     add_to_multicast_group(nl_event_sock, "scan");
@@ -178,10 +161,7 @@ void Nl80211::create_event_sock(EventLoop &event_loop) {
     nl_socket_set_nonblocking(nl_event_sock);
 
     nl_event_cb = nl_cb_alloc(NL_CB_DEFAULT);
-    if (!nl_event_cb) {
-        fprintf(stderr, "failed to allocate libnl callback\n");
-        abort();
-    }
+    assert(nl_event_cb != 0);
 
     nl_cb_set(nl_event_cb, NL_CB_SEQ_CHECK, NL_CB_CUSTOM, no_seq_check, NULL);
     nl_cb_set(nl_event_cb, NL_CB_VALID, NL_CB_CUSTOM, ::handle_event, (void *) this);
@@ -190,48 +170,32 @@ void Nl80211::create_event_sock(EventLoop &event_loop) {
 }
 
 void Nl80211::create_info_sock() {
-    nl_info_sock = nl_socket_alloc();
+    int res;
 
-    if (!nl_info_sock) {
-        fprintf(stderr, "couldn't allocate netlink socket\n");
-        abort();
-    }
+    nl_info_sock = nl_socket_alloc();
+    assert(nl_info_sock != 0);
+
     
     nl_socket_set_buffer_size(nl_info_sock, 8192, 8192);
 
-    if (genl_connect(nl_info_sock)) {
-        fprintf(stderr, "couldn't connect to netlink socket\n");
-        abort();
-    } 
+    res = genl_connect(nl_info_sock);
+    assert(res == 0);
 
     nl_info_s_cb = nl_cb_alloc(NL_CB_DEFAULT);
-    if (!nl_info_s_cb) {
-        fprintf(stderr, "failed to allocate libnl callback\n");
-        abort();
-    }
+    assert(nl_info_s_cb != 0);
     
     nl_socket_set_cb(nl_info_sock, nl_info_s_cb);
     
     nl_info_cb = nl_cb_alloc(NL_CB_DEFAULT);
-    if (!nl_info_cb) {
-        fprintf(stderr, "failed to allocate libnl callback\n");
-        abort();
-    }
+    assert(nl_info_cb != 0);
 
     info_nl80211_id = genl_ctrl_resolve(nl_info_sock, "nl80211");
-    if (info_nl80211_id < 0) {
-        fprintf(stderr, "couldn't resolve nl80211\n");
-        abort();
-    }
+    assert(info_nl80211_id >= 0);
 }
 
 void Nl80211::descriptor_ready() noexcept {
     int res = nl_recvmsgs(nl_event_sock, nl_event_cb);
-
-    if (res != 0) {
-        fprintf(stderr, "nl_recvmsgs returned %d\n", res);
-        abort();
-    }
+    assert(res == 0);
 }
     
 void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info) noexcept {
@@ -242,17 +206,10 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
     info.connected = false;
     
     dev_idx = if_nametoindex(ifname);
-
-    if (dev_idx == 0) {
-        fprintf(stderr, "unknown ifname %s\n", ifname);
-        abort();
-    }
+    assert(dev_idx != 0);
 
     msg = nlmsg_alloc();
-    if (!msg) {
-        fprintf(stderr, "failed to allocate struct nl_msg\n");
-        abort();
-    }
+    assert(msg != 0);
 
     genlmsg_put(msg, 0, 0, info_nl80211_id, 0,
                 NLM_F_DUMP, NL80211_CMD_GET_SCAN, 0);
@@ -262,16 +219,10 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
     nl_cb_set(nl_info_cb, NL_CB_VALID, NL_CB_CUSTOM, ::handle_info, (void *) &info);
 
     res = nl_send_auto_complete(nl_info_sock, msg);
-    if (res < 0) {
-        fprintf(stderr, "nl_send_auto_complete received %d\n", res);
-        abort();
-    }
+    assert(res >= 0);
 
     res = nl_recvmsgs(nl_info_sock, nl_info_cb);
-    if (res != 0) {
-        fprintf(stderr, "nl_recvmsgs returned %d\n", res);
-        abort();
-    }
+    assert(res == 0);
     
     // if we found anything, request even more details
     if (info.connected) {
@@ -281,24 +232,15 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
         NLA_PUT(msg, NL80211_ATTR_MAC, ETH_ALEN, info.mac);
 
         res = nl_send_auto_complete(nl_info_sock, msg);
-
-        if (res < 0) {
-            fprintf(stderr, "nl_send_auto_complete received %d\n", res);
-            abort();
-        }
+        assert(res >= 0);
 
         res = nl_recvmsgs(nl_info_sock, nl_info_cb);
-
-        if (res != 0) {
-            fprintf(stderr, "nl_recvmsgs returned %d\n", res);
-            abort();
-        }
+        assert(res == 0);
     }
     nlmsg_free(msg); 
     return;
 nla_put_failure:
-    fprintf(stderr, "message building failed\n");
-    abort();
+    assert(false);
 }
 
 void Nl80211::__handle_event(struct nl_msg *msg) noexcept {

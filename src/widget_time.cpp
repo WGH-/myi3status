@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cassert>
 
 #include <unistd.h>
 #include <errno.h>
@@ -27,24 +28,18 @@ WidgetTime::WidgetTime(EventLoop &event_loop) {
 
 void WidgetTime::update_string() noexcept {
     struct timespec tp;
-    struct tm result;
+    struct tm result, *result_p;
     size_t res;
+    int err;
 
-    if (clock_gettime(CLOCK_REALTIME, &tp) < 0) {
-        perror("clock_gettime");
-        abort();
-    }
+    err = clock_gettime(CLOCK_REALTIME, &tp);
+    assert(err == 0);
 
-    if (localtime_r(&tp.tv_sec, &result) == nullptr) {
-        perror("localtime_r");
-        abort();
-    }
+    result_p = localtime_r(&tp.tv_sec, &result);
+    assert(result_p != nullptr);
 
     res = strftime(buffer, sizeof(buffer), FORMAT_STRING, &result);
-    if (res == 0) {
-        fprintf(stderr, "strftime failed\n");
-        abort();
-    }
+    assert(res != 0);
 }
 
 const char * WidgetTime::get_string(bool force_update) noexcept {

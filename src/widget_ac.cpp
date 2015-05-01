@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 
 #include <errno.h>
 #include <unistd.h>
@@ -42,23 +43,14 @@ static const char * get_device_name(const char *symlink_name) {
 
     res = readlinkat(CachedPathDescriptors::get_sysclasspowersupply(), symlink_name, path, sizeof(path));
 
-    if (res < 0) {
-        perror("readlinkat");
-        abort();
-    }
+    assert(res >= 0);
 
-    if (size_t(res) >= sizeof(path) - 1) {
-        fprintf(stderr, "readlinkat: path is too large\n");
-        abort();
-    }
+    assert(size_t(res) < sizeof(path) - 1);
 
     path[res] = '\0'; // readlink doesn't put a null terminator
 
     device_name = strstr(path, "/devices/");
-    if (device_name == nullptr) {
-        fprintf(stderr, "couldn't find device part in %s\n", path);
-        abort();
-    }
+    assert(device_name != nullptr);
 
     return strdup(device_name);
 }
@@ -79,10 +71,7 @@ void WidgetAC::update_string() noexcept {
     buffer[0] = '\0';
 
     dirfd_ac = openat(CachedPathDescriptors::get_sysclasspowersupply(), ac_name, O_RDONLY | O_DIRECTORY | O_PATH);
-    if (dirfd_ac < 0 && errno != ENOENT) {
-        perror("openat(battery_name)");
-        exit(1);
-    }
+    assert(dirfd_ac >= 0 || errno == ENOENT);
 
     bool is_online = dirfd_ac >= 0 && is_connected(dirfd_ac);
 

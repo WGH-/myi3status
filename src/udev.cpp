@@ -1,5 +1,6 @@
 #include "udev.h"
 
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 
@@ -8,28 +9,20 @@
 UdevMonitor::UdevMonitor(EventLoop &event_loop) 
 {
     struct udev *udev;
+    int res;
     
     udev = udev_new();
-    if (udev == nullptr) {
-        fprintf(stderr, "couldn't create udev object\n");
-        abort();
-    }
+    assert(udev != nullptr);
 
     udev_monitor = udev_monitor_new_from_netlink(udev, "udev"); 
+    assert(udev_monitor != nullptr);
     
-    if (udev_monitor == nullptr) {
-        fprintf(stderr, "couldn't create udev_monitor object\n");
-        abort();
-    }
-
     udev_monitor_set_receive_buffer_size(udev_monitor, UDEV_MONITOR_RECV_BUFFER);
      
     udev_fd = udev_monitor_get_fd(udev_monitor);
 
-    if (udev_monitor_enable_receiving(udev_monitor) < 0) {
-        fprintf(stderr, "couldn't subscribe to udev events\n");
-        abort();
-    }
+    res = udev_monitor_enable_receiving(udev_monitor);
+    assert(res == 0);
 
     event_loop.add_fd(this, udev_fd);
 }
