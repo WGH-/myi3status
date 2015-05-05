@@ -16,6 +16,26 @@ extern "C" char *if_indextoname (unsigned int __ifindex, char *__ifname);
 
 #define DISCONNECTED_COLOR "#FF0000"
 
+static const char *signal_strengths[] = {
+    " ","▁","▂","▃","▄","▅","▆","▇","█"
+};
+
+static int signal_level_from_rssi(int rssi, int levels)
+{
+    static const int MIN_RSSI = -95;
+    static const int MAX_RSSI = -65;
+
+    if (rssi <= MIN_RSSI) {
+        return 0; 
+    } else if (rssi >= MAX_RSSI) {
+        return levels-1;
+    } else {
+        float delta = MAX_RSSI - MIN_RSSI;
+
+        return int(float(rssi - MIN_RSSI) * (levels-1) / delta);
+    }
+}
+
 Widget_nl80211::Widget_nl80211(Nl80211 &nl80211, Rtnetlink &rtnetlink, const char *ifname)
     : nl80211(nl80211), rtnetlink(rtnetlink)
 {
@@ -32,8 +52,13 @@ void Widget_nl80211::update_string(struct rtnl_link *link) noexcept {
     nl80211.get_interface_info(ifname, info);
 
     if (info.connected) {
+        int level;
+        
+        level = signal_level_from_rssi(info.signal_strength, sizeof(signal_strengths) / sizeof(signal_strengths[0]));
+
         snprintf(string, sizeof(string), 
-            "{\"full_text\": \"%s\"}",
+            "{\"full_text\": \"%s %s\"}",
+            signal_strengths[level],
             info.ssid_filtered
         );
     } else {
