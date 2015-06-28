@@ -7,6 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
 set(WITH_ALSA false CACHE BOOL "Enable ALSA support")
 set(WITH_PULSE false CACHE BOOL "Enable PulseAudio support")
 set(WITH_TIME false CACHE BOOL "Enable time support")
+set(WITH_MEM false CACHE BOOL "Enable memory usage support")
 set(WITH_POWER false CACHE BOOL "Enable power support (via procfs)")
 set(WITH_NET false CACHE BOOL "Enable networking support (via netlink)")
 set(WITH_NET_NL80211 false CACHE BOOL "Enable NL80211 extensions (via netlink)")
@@ -36,6 +37,11 @@ endif()
 if (${WITH_TIME})
     list(APPEND sources
         src/widget_time.cpp)
+endif()
+
+if (${WITH_MEM})
+    list(APPEND sources
+        src/widget_mem.cpp)
 endif()
 
 if (${WITH_POWER})
