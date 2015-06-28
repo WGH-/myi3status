@@ -8,7 +8,7 @@ file(GLOB_RECURSE sources src/*.cpp src/*.c)
 file(GLOB_RECURSE headers src/*.h)
 
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions("-std=c++11")
+    add_definitions("-std=c++11 -fno-rtti -fno-exceptions")
 endif()
 
 add_executable(myi3status ${sources})
