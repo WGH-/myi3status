@@ -10,7 +10,7 @@
 #include <fcntl.h>
 
 #include "utils.h"
-#include "cached_path_descriptors.h"
+#include "cached_descriptors.h"
 
 const char * const COLOR_OFFLINE = "#404040";
 const char * const COLOR_ONLINE = "#F0F000";
@@ -41,7 +41,7 @@ static const char * get_device_name(const char *symlink_name) {
     const char *device_name;
     ssize_t res;
 
-    res = readlinkat(CachedPathDescriptors::get_sysclasspowersupply(), symlink_name, path, sizeof(path));
+    res = readlinkat(CachedDescriptors::get_sysclasspowersupply(), symlink_name, path, sizeof(path));
 
     assert(res >= 0);
 
@@ -70,7 +70,7 @@ void WidgetAC::update_string() noexcept {
 
     buffer[0] = '\0';
 
-    dirfd_ac = openat(CachedPathDescriptors::get_sysclasspowersupply(), ac_name, O_RDONLY | O_DIRECTORY | O_PATH);
+    dirfd_ac = openat(CachedDescriptors::get_sysclasspowersupply(), ac_name, O_RDONLY | O_DIRECTORY | O_PATH);
     assert(dirfd_ac >= 0 || errno == ENOENT);
 
     bool is_online = dirfd_ac >= 0 && is_connected(dirfd_ac);

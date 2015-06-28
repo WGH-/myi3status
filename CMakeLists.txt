@@ -13,7 +13,7 @@ set(WITH_NET_NL80211 false CACHE BOOL "Enable NL80211 extensions (via netlink)")
 
 set(sources
     src/main.cpp
-    src/cached_path_descriptors.cpp
+    src/cached_descriptors.cpp
     src/event_loop.cpp
     src/signalfd.cpp
     src/utils.cpp

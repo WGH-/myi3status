@@ -4,7 +4,7 @@
 #include <fcntl.h>
 
 #include "utils.h"
-#include "cached_path_descriptors.h"
+#include "cached_descriptors.h"
 
 static unsigned long get_wattage(const char *battery_name) 
 {
@@ -12,7 +12,7 @@ static unsigned long get_wattage(const char *battery_name)
     int fd_powernow = -1;
     unsigned long result = 0;
 
-    dirfd_battery = openat(CachedPathDescriptors::get_sysclasspowersupply(), battery_name, O_RDONLY | O_DIRECTORY | O_PATH);
+    dirfd_battery = openat(CachedDescriptors::get_sysclasspowersupply(), battery_name, O_RDONLY | O_DIRECTORY | O_PATH);
 
     if (dirfd_battery < 0 && errno != ENOENT) {
         perror("openat(battery_name)");

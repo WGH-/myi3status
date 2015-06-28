@@ -8,7 +8,7 @@
 #include <fcntl.h>
 
 #include "utils.h"
-#include "cached_path_descriptors.h"
+#include "cached_descriptors.h"
 
 static float get_battery_level(int battery_dirfd) {
     int energynow_fd, energyfull_fd;
@@ -44,7 +44,7 @@ void WidgetBattery::update_string() noexcept {
 
     // we can't cache battery directory
     // because it may come and go as battery is attached/detached
-    dirfd_battery = openat(CachedPathDescriptors::get_sysclasspowersupply(), battery_name, O_RDONLY | O_DIRECTORY | O_PATH);
+    dirfd_battery = openat(CachedDescriptors::get_sysclasspowersupply(), battery_name, O_RDONLY | O_DIRECTORY | O_PATH);
     // note that battery might be not present
     if (dirfd_battery < 0 && errno != ENOENT) {
         perror("openat(battery_name)");
