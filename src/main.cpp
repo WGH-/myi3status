@@ -12,7 +12,7 @@
 #include "widget_battery.h"
 #include "widget_wattage.h"
 #include "widget_ac.h"
-#include "widget_alsa.h"
+#include "widget_pulse.h"
 
 int main(void) {
     EventLoop event_loop;
@@ -33,7 +33,7 @@ int main(void) {
     NEW_WIDGET(WidgetWattage, widget_wattage, event_loop, {"BAT0", "BAT1"});
     NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
     NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1");
-    NEW_WIDGET(Widget_ALSA, wiget_alsa, event_loop);
+    NEW_WIDGET(Widget_Pulse, widget_pulse, event_loop, "1");
     NEW_WIDGET(WidgetTime, widget_time, event_loop);
 
     event_loop.run();

@@ -45,7 +45,7 @@ static void handle_info_bss_ies(const unsigned char *data, size_t length, Nl8021
                 if (std::isprint(info.ssid[i]) && info.ssid[i] != '"') {
                     info.ssid_filtered[i] = info.ssid[i];
                 } else {
-                    info.ssid[i] = '?';
+                    info.ssid_filtered[i] = '?';
                 }
             }
             info.ssid_filtered[l] = '\0';
