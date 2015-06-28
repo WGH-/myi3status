@@ -10,7 +10,7 @@ class WidgetMem : public Widget, Epollable {
 
     char buffer[64];
 public:
-    WidgetMem(EventLoop &event_loop);
+    WidgetMem(EventLoop &event_loop, unsigned long poll_interval_ms);
     virtual const char* get_string(bool force_update) noexcept override;
     virtual void descriptor_ready() noexcept override;
 };

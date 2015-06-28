@@ -30,12 +30,12 @@ static unsigned long get_wattage(const char *battery_name)
     return result;
 }
 
-WidgetWattage::WidgetWattage(EventLoop &event_loop, std::initializer_list<const char*> batteries) {
+WidgetWattage::WidgetWattage(EventLoop &event_loop, std::initializer_list<const char*> batteries, unsigned poll_interval_ms) {
     for (const char *battery_name : batteries) {
         this->batteries.push_back(battery_name);
     }
 
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::seconds(15));
+    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::milliseconds(poll_interval_ms));
     event_loop.add_fd(this, timerfd);
 
     update_string();

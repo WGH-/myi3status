@@ -28,10 +28,10 @@ static float get_battery_level(int battery_dirfd) {
     return float(energy_now) / energy_full;
 }
 
-WidgetBattery::WidgetBattery(EventLoop &event_loop, const char *battery_name) {
+WidgetBattery::WidgetBattery(EventLoop &event_loop, const char *battery_name, unsigned long poll_interval_ms) {
     this->battery_name = battery_name;
 
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::seconds(15));
+    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::milliseconds(poll_interval_ms));
     event_loop.add_fd(this, timerfd);
 
     update_string();

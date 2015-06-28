@@ -69,9 +69,9 @@ void MemInfo::fill_meminfo(int fd)
     }
 }
 
-WidgetMem::WidgetMem(EventLoop &event_loop)
+WidgetMem::WidgetMem(EventLoop &event_loop, unsigned long poll_interval_ms)
 {
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::milliseconds(500));
+    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::milliseconds(poll_interval_ms));
 
     event_loop.add_fd(this, timerfd);
     update_string();

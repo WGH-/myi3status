@@ -30,11 +30,11 @@ int main(void) {
     NEW_WIDGET(Widget_IP, widget_wlp3s0_ip, rtnetlink, "wlp3s0", "#008b8b");
     NEW_WIDGET(Widget_IP, widget_enp0s25_ip, rtnetlink, "enp0s25", "#8b8b00");
     NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, rtnetlink, "wlp3s0");
-    NEW_WIDGET(WidgetMem, widget_mem, event_loop);
+    NEW_WIDGET(WidgetMem, widget_mem, event_loop, 1000);
     NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
-    NEW_WIDGET(WidgetWattage, widget_wattage, event_loop, {"BAT0", "BAT1"});
-    NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0");
-    NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1");
+    NEW_WIDGET(WidgetWattage, widget_wattage, event_loop, {"BAT0", "BAT1"}, 2500);
+    NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0", 2500);
+    NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1", 2500);
     NEW_WIDGET(Widget_Pulse, widget_pulse, event_loop, "1");
     NEW_WIDGET(WidgetTime, widget_time, event_loop);
 
