@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 class Epollable {
 public:
@@ -22,6 +23,8 @@ class EventLoop : SignalFdListener {
     
     bool force_next_update;
     void print_stuff() noexcept;
+
+    std::string front_buffer, back_buffer;
 public:
     EventLoop();
 

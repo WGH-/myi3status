@@ -49,7 +49,10 @@ void EventLoop::run() noexcept {
 }
 
 void EventLoop::print_stuff() noexcept {
-    putchar('[');
+    front_buffer.resize(0);
+
+    front_buffer += '[';
+
     bool need_comma = false;
 
     for (Widget *widget : widgets) {
@@ -58,16 +61,22 @@ void EventLoop::print_stuff() noexcept {
         if (!s || !s[0]) continue;
 
         if (need_comma) {
-            putchar(',');
+            front_buffer += ',';
         } else {
             need_comma = true;
         }
 
-        fputs(s, stdout);
+        front_buffer += s;
     }
     force_next_update = false;
-    fputs("],\n", stdout);
-    fflush(stdout);
+
+    if (front_buffer != back_buffer) {
+        fputs(front_buffer.c_str(), stdout);
+        fputs("],\n", stdout);
+        fflush(stdout);
+
+        std::swap(front_buffer, back_buffer);
+    }
 }
     
 void EventLoop::received_signal(const struct signalfd_siginfo *siginfo) noexcept {
