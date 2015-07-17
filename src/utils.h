@@ -5,20 +5,25 @@
 int create_timerfd_inner(int clockid, const struct timespec *interval, const struct timespec *value, bool absolute);
 
 template<typename T>
-int create_timerfd(int clockid, T interval, T value, bool absolute) {
+struct timespec chrono_to_timespec(T value)
+{
     using namespace std::chrono;
 
-    struct timespec interval2, value2;
+    struct timespec result;
 
-    auto s = duration_cast<seconds>(interval);
-    auto ns = duration_cast<nanoseconds>(interval - s);
-    interval2.tv_sec = s.count();
-    interval2.tv_nsec = ns.count();
+    auto s = duration_cast<seconds>(value);
+    auto ns = duration_cast<nanoseconds>(value - s);
 
-    s = duration_cast<seconds>(value);
-    ns = duration_cast<nanoseconds>(value - s);
-    value2.tv_sec = s.count();
-    value2.tv_nsec = ns.count();
+    result.tv_sec = s.count();
+    result.tv_nsec = ns.count();
+
+    return result;
+}
+
+template<typename T>
+int create_timerfd(int clockid, T interval, T value, bool absolute) {
+    struct timespec interval2 = chrono_to_timespec(interval),
+                    value2 = chrono_to_timespec(value);
 
     return create_timerfd_inner(clockid, &interval2, &value2, absolute);
 }
