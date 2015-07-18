@@ -28,7 +28,7 @@ TimerManager::TimerManager(EventLoop &event_loop)
 
 bool operator<(const struct timespec &a, const struct timespec &b)
 {
-    return a.tv_sec < b.tv_sec && a.tv_nsec < b.tv_nsec;
+    return std::tie(a.tv_sec, a.tv_nsec) < std::tie(b.tv_sec, b.tv_nsec);
 }
 
 void TimerManager::register_monotonic_listener(TimerListener *listener, const struct timespec &interval)
