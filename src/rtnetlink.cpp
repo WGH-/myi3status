@@ -14,14 +14,14 @@ static void handle_event_obj(struct nl_object *obj, void *arg)
     int msgtype = nl_object_get_msgtype(obj);
 
     if (msgtype == RTM_NEWLINK || msgtype == RTM_DELLINK) {
-        inst->__handle_event_link((struct rtnl_link *)obj); 
+        inst->__handle_event_link((struct rtnl_link *)obj);
     }
     if (msgtype == RTM_NEWADDR || msgtype == RTM_DELADDR) {
         inst->__handle_event_addr((struct rtnl_addr *)obj);
     }
 }
 
-static int handle_event(struct nl_msg *msg, void *arg) 
+static int handle_event(struct nl_msg *msg, void *arg)
 {
     Rtnetlink *inst = (Rtnetlink *) arg;
 
@@ -33,17 +33,17 @@ static int handle_event(struct nl_msg *msg, void *arg)
 }
 
 Rtnetlink::Rtnetlink(EventLoop &event_loop) {
-    create_info_sock(); 
+    create_info_sock();
     create_event_sock(event_loop);
 }
 
 void Rtnetlink::create_info_sock() {
     int res;
-    
+
     nl_info_sock = nl_socket_alloc();
 
     assert(nl_info_sock != NULL);
-    
+
     nl_socket_set_buffer_size(nl_info_sock, 8192, 8192);
 
     res = nl_connect(nl_info_sock, NETLINK_ROUTE);
@@ -56,12 +56,12 @@ void Rtnetlink::create_event_sock(EventLoop &event_loop) {
     nl_event_sock = nl_socket_alloc();
 
     assert(nl_event_sock != NULL);
-    
+
     nl_socket_set_buffer_size(nl_event_sock, 8192, 8192);
 
     res = nl_connect(nl_event_sock, NETLINK_ROUTE);
     assert(res == 0);
-    
+
     nl_socket_disable_seq_check(nl_event_sock);
     nl_socket_set_nonblocking(nl_event_sock);
 
@@ -71,7 +71,7 @@ void Rtnetlink::create_event_sock(EventLoop &event_loop) {
     nl_socket_add_membership(nl_event_sock, RTNLGRP_IPV4_IFADDR);
     nl_socket_add_membership(nl_event_sock, RTNLGRP_IPV6_IFADDR);
     // TODO more groups
-    
+
     event_loop.add_fd(this, nl_socket_get_fd(nl_event_sock));
 }
 
@@ -112,7 +112,7 @@ void Rtnetlink::fill_addr_info(AddrInfo &info, struct rtnl_addr *addr)
     if (nl_addr_get_family(local_addr) != AF_INET) {
         // TODO support IPv6
         return;
-    } 
+    }
     struct in_addr *ipv4 = (struct in_addr *) nl_addr_get_binary_addr(local_addr);
 
     if (msgtype == RTM_DELADDR) {
@@ -141,14 +141,14 @@ void Rtnetlink::add_addr_listener(AddrListener *listener)
     addr_listeners.push_back(listener);
 }
 
-void Rtnetlink::__handle_event_link(struct rtnl_link *link) 
+void Rtnetlink::__handle_event_link(struct rtnl_link *link)
 {
     for (auto *listener : link_listeners) {
         listener->link_event(link);
     }
 }
 
-void Rtnetlink::__handle_event_addr(struct rtnl_addr *addr) 
+void Rtnetlink::__handle_event_addr(struct rtnl_addr *addr)
 {
     for (auto *listener : addr_listeners) {
         listener->addr_event(addr);

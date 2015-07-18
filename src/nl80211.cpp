@@ -65,7 +65,7 @@ static void handle_info_bss(struct nlattr **tb, Nl80211::InterfaceInfo &info)
                            tb[NL80211_ATTR_BSS],
                            bss_policy);
     assert(res == 0);
-    
+
     if (!bss[NL80211_BSS_STATUS] || !bss[NL80211_BSS_BSSID]) {
         return;
     }
@@ -89,7 +89,7 @@ static void handle_info_bss(struct nlattr **tb, Nl80211::InterfaceInfo &info)
 static void handle_info_sta(struct nlattr **tb, Nl80211::InterfaceInfo &info) {
     struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
     int res;
-        
+
     res = nla_parse_nested(sinfo, NL80211_STA_INFO_MAX,
                            tb[NL80211_ATTR_STA_INFO], sta_policy);
     assert(res == 0);
@@ -113,7 +113,7 @@ static int handle_info(struct nl_msg *msg, void *arg)
     Nl80211::InterfaceInfo *info = (Nl80211::InterfaceInfo *) arg;
     struct genlmsghdr *gnlh = (struct genlmsghdr *) nlmsg_data(nlmsg_hdr(msg));
     struct nlattr *tb[NL80211_ATTR_MAX + 1];
-    
+
     nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
 
     if (tb[NL80211_ATTR_BSS]) {
@@ -165,7 +165,7 @@ void Nl80211::create_event_sock(EventLoop &event_loop) {
 
     nl_cb_set(nl_event_cb, NL_CB_SEQ_CHECK, NL_CB_CUSTOM, no_seq_check, NULL);
     nl_cb_set(nl_event_cb, NL_CB_VALID, NL_CB_CUSTOM, ::handle_event, (void *) this);
-    
+
     event_loop.add_fd(this, nl_socket_get_fd(nl_event_sock));
 }
 
@@ -175,7 +175,7 @@ void Nl80211::create_info_sock() {
     nl_info_sock = nl_socket_alloc();
     assert(nl_info_sock != 0);
 
-    
+
     nl_socket_set_buffer_size(nl_info_sock, 8192, 8192);
 
     res = genl_connect(nl_info_sock);
@@ -183,9 +183,9 @@ void Nl80211::create_info_sock() {
 
     nl_info_s_cb = nl_cb_alloc(NL_CB_DEFAULT);
     assert(nl_info_s_cb != 0);
-    
+
     nl_socket_set_cb(nl_info_sock, nl_info_s_cb);
-    
+
     nl_info_cb = nl_cb_alloc(NL_CB_DEFAULT);
     assert(nl_info_cb != 0);
 
@@ -197,14 +197,14 @@ void Nl80211::descriptor_ready() noexcept {
     int res = nl_recvmsgs(nl_event_sock, nl_event_cb);
     assert(res == 0);
 }
-    
+
 void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info) noexcept {
     unsigned int dev_idx;
     struct nl_msg *msg;
     int res;
-    
+
     info.connected = false;
-    
+
     dev_idx = if_nametoindex(ifname);
     assert(dev_idx != 0);
 
@@ -214,7 +214,7 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
     genlmsg_put(msg, 0, 0, info_nl80211_id, 0,
                 NLM_F_DUMP, NL80211_CMD_GET_SCAN, 0);
     NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, dev_idx);
-    
+
     // callback will fill in 'info'
     nl_cb_set(nl_info_cb, NL_CB_VALID, NL_CB_CUSTOM, ::handle_info, (void *) &info);
 
@@ -223,7 +223,7 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
 
     res = nl_recvmsgs(nl_info_sock, nl_info_cb);
     assert(res == 0);
-    
+
     // if we found anything, request even more details
     if (info.connected) {
         genlmsg_put(msg, 0, 0, info_nl80211_id, 0,
@@ -237,7 +237,7 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
         res = nl_recvmsgs(nl_info_sock, nl_info_cb);
         assert(res == 0);
     }
-    nlmsg_free(msg); 
+    nlmsg_free(msg);
     return;
 nla_put_failure:
     assert(false);

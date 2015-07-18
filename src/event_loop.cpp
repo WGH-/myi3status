@@ -16,7 +16,7 @@
 EventLoop::EventLoop() {
     epoll_fd = epoll_create1(0);
     check_fd(epoll_fd, "epoll_create1");
-    
+
     force_next_update = false;
 }
 
@@ -78,7 +78,7 @@ void EventLoop::print_stuff() noexcept {
         std::swap(front_buffer, back_buffer);
     }
 }
-    
+
 void EventLoop::received_signal(const struct signalfd_siginfo *siginfo) noexcept {
     if (siginfo->ssi_signo == SIGUSR1) {
         force_next_update = true;

@@ -135,7 +135,7 @@ void Widget_Pulse::get_sink_volume_callback(
     assert(i != nullptr);
 
     this->volume = pa_cvolume_avg(&i->volume);
-    
+
     notify_eventfd();
 }
 

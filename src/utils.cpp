@@ -12,7 +12,7 @@ int create_timerfd_inner(int clockid, const struct timespec *interval, const str
 {
     int err;
     int fd = timerfd_create(clockid, TFD_NONBLOCK | TFD_CLOEXEC);
-    check_fd(fd, "timerfd_create"); 
+    check_fd(fd, "timerfd_create");
 
     struct itimerspec new_val;
     new_val.it_interval = *interval;

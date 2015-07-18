@@ -13,9 +13,9 @@ Widget_IP::Widget_IP(Rtnetlink &rtnetlink, const char *ifname, const char *color
     : rtnetlink(rtnetlink)
 {
     this->ifname = ifname;
-    
+
     this->color = color ? color : IP_DEFAULT_COLOR;
-    
+
     rtnetlink.add_addr_listener(this);
     rtnetlink.force_addr_update();
 
@@ -33,7 +33,7 @@ void Widget_IP::update_string() noexcept {
         char buffer[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &addr_info.addr, buffer, sizeof(buffer));
 
-        snprintf(string, sizeof(string), 
+        snprintf(string, sizeof(string),
             "{"
                 "\"full_text\": \"%s\","
                 "\"color\": \"%s\""

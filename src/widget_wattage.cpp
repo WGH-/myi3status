@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "cached_descriptors.h"
 
-static unsigned long get_wattage(const char *battery_name) 
+static unsigned long get_wattage(const char *battery_name)
 {
     int dirfd_battery = -1;
     int fd_powernow = -1;
@@ -18,12 +18,12 @@ static unsigned long get_wattage(const char *battery_name)
         perror("openat(battery_name)");
         exit(1);
     }
-    
+
     if (dirfd_battery >= 0) {
-        fd_powernow = openat(dirfd_battery, "power_now", O_RDONLY); 
+        fd_powernow = openat(dirfd_battery, "power_now", O_RDONLY);
         result = read_ulong_from_file(fd_powernow);
     }
-    
+
     close(fd_powernow);
     close(dirfd_battery);
 

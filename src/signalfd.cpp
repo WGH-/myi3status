@@ -13,7 +13,7 @@ SignalFd::SignalFd(EventLoop &event_loop, std::initializer_list<int> signals)
 {
     int res;
     sigset_t mask;
-    
+
     sigemptyset(&mask);
 
     for (int signo : signals) {
@@ -34,7 +34,7 @@ void SignalFd::descriptor_ready() noexcept
     while (true) {
         signalfd_siginfo siginfo;
         ssize_t res = read(fd, &siginfo, sizeof(siginfo));
-        
+
         if (res < 0) {
             if (errno == EAGAIN) break;
             assert(false);

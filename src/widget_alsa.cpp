@@ -56,10 +56,10 @@ static int mixer_callback(snd_mixer_t *mixer, unsigned int mask, snd_mixer_elem_
     return 0;
 }
 
-Widget_ALSA::Widget_ALSA(EventLoop &event_loop) 
+Widget_ALSA::Widget_ALSA(EventLoop &event_loop)
 {
     __instances.push_back(this);
-    
+
     volume = -1;
 
     open_mixer(event_loop);
@@ -100,7 +100,7 @@ void Widget_ALSA::open_mixer(EventLoop &event_loop)
 
     std::vector<struct pollfd> pollfds;
     pollfds.resize(nfds);
-    
+
     err = snd_mixer_poll_descriptors(__mixer, &pollfds[0], nfds);
     assert(err >= 0);
 
@@ -109,7 +109,7 @@ void Widget_ALSA::open_mixer(EventLoop &event_loop)
     }
 }
 
-void Widget_ALSA::update_string() noexcept 
+void Widget_ALSA::update_string() noexcept
 {
     if (volume >= 0) {
         snprintf(string, sizeof(string),
@@ -126,7 +126,7 @@ const char* Widget_ALSA::get_string(bool force_update) noexcept
     return string;
 }
 
-void Widget_ALSA::descriptor_ready() noexcept 
+void Widget_ALSA::descriptor_ready() noexcept
 {
     snd_mixer_handle_events(__mixer);
 }
@@ -138,9 +138,9 @@ void Widget_ALSA::__volume_changed(snd_mixer_elem_t *elem)
         long pmin, pmax;
 
         snd_mixer_selem_get_playback_volume_range(elem, &pmin, &pmax);
-        
-        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &value_left); 
-        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, &value_right); 
+
+        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &value_left);
+        snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_RIGHT, &value_right);
 
         value = std::max(value_left, value_right);
 

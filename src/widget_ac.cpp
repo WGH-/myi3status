@@ -57,11 +57,11 @@ static const char * get_device_name(const char *symlink_name) {
 
 WidgetAC::WidgetAC(EventLoop &event_loop, UdevMonitor &udev_monitor, const char *ac_name) {
     this->ac_name = ac_name;
-    
+
     full_device_name = get_device_name(ac_name);
 
     udev_monitor.add_listener(this);
-    
+
     update_string();
 }
 

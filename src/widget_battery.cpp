@@ -14,10 +14,10 @@ static float get_battery_level(int battery_dirfd) {
     int energynow_fd, energyfull_fd;
 
     energynow_fd = openat(battery_dirfd, "energy_now", O_RDONLY);
-    check_fd(energynow_fd, "openat(..., \"energy_now\")"); 
+    check_fd(energynow_fd, "openat(..., \"energy_now\")");
 
     energyfull_fd = openat(battery_dirfd, "energy_full", O_RDONLY);
-    check_fd(energyfull_fd, "openat(..., \"energy_full\")"); 
+    check_fd(energyfull_fd, "openat(..., \"energy_full\")");
 
     unsigned long energy_now = read_ulong_from_file(energynow_fd);
     unsigned long energy_full = read_ulong_from_file(energyfull_fd);

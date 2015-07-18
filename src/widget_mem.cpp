@@ -53,7 +53,7 @@ void MemInfo::fill_meminfo(int fd)
 
         const char *colonp = strchr(p, ':');
         if (colonp == nullptr) break;
-        
+
         for (auto meminfo_offset = meminfo_offsets; meminfo_offset->field_name != nullptr; meminfo_offset++) {
             if (strncmp(meminfo_offset->field_name, p, colonp - p) == 0) {
                 unsigned long *ulong = (unsigned long *)(((char*)this) + meminfo_offset->offset);

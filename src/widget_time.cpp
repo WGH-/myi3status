@@ -11,7 +11,7 @@
 
 #include "utils.h"
 
-static const char * const FORMAT_STRING = 
+static const char * const FORMAT_STRING =
     "{\"full_text\": \"%F %H:%M\"}";
 
 WidgetTime::WidgetTime(EventLoop &event_loop) {

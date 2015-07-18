@@ -6,19 +6,19 @@
 
 #define UDEV_MONITOR_RECV_BUFFER (128 * 1024 * 1024)
 
-UdevMonitor::UdevMonitor(EventLoop &event_loop) 
+UdevMonitor::UdevMonitor(EventLoop &event_loop)
 {
     struct udev *udev;
     int res;
-    
+
     udev = udev_new();
     assert(udev != nullptr);
 
-    udev_monitor = udev_monitor_new_from_netlink(udev, "udev"); 
+    udev_monitor = udev_monitor_new_from_netlink(udev, "udev");
     assert(udev_monitor != nullptr);
-    
+
     udev_monitor_set_receive_buffer_size(udev_monitor, UDEV_MONITOR_RECV_BUFFER);
-     
+
     udev_fd = udev_monitor_get_fd(udev_monitor);
 
     res = udev_monitor_enable_receiving(udev_monitor);
@@ -29,9 +29,9 @@ UdevMonitor::UdevMonitor(EventLoop &event_loop)
 
 void UdevMonitor::add_listener(UdevListener *listener)
 {
-    listeners.push_back(listener); 
+    listeners.push_back(listener);
 }
-    
+
 void UdevMonitor::descriptor_ready() noexcept {
     for (;;) {
         struct udev_device *udev_device;
