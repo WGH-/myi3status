@@ -1,15 +1,16 @@
 #pragma once
 
 #include "event_loop.h"
+#include "timer.h"
 
-class WidgetBattery : public Widget, Epollable {
+class WidgetBattery : public Widget, TimerListener {
     int timerfd;
     const char *battery_name;
 
     void update_string() noexcept;
     char buffer[32];
 public:
-    WidgetBattery(EventLoop &event_loop, const char *battery_name, unsigned long poll_interval_ms);
+    WidgetBattery(TimerManager &timer_manager, const char *battery_name, unsigned long poll_interval_ms);
     virtual const char* get_string(bool force_update) noexcept override;
-    virtual void descriptor_ready() noexcept override;
+    virtual void timer_ready() noexcept override;
 };

@@ -69,11 +69,10 @@ void MemInfo::fill_meminfo(int fd)
     }
 }
 
-WidgetMem::WidgetMem(EventLoop &event_loop, unsigned long poll_interval_ms)
+WidgetMem::WidgetMem(TimerManager &timer_manager, unsigned long poll_interval_ms)
 {
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::milliseconds(poll_interval_ms));
+    timer_manager.register_monotonic_listener(this, std::chrono::milliseconds(poll_interval_ms));
 
-    event_loop.add_fd(this, timerfd);
     update_string();
 }
 
@@ -110,7 +109,6 @@ const char *WidgetMem::get_string(bool force_update) noexcept
     return buffer;
 }
 
-void WidgetMem::descriptor_ready() noexcept {
-    consume_timerfd(timerfd);
+void WidgetMem::timer_ready() noexcept {
     update_string();
 }

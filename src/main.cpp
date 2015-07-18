@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include "event_loop.h"
+#include "timer.h"
 #include "nl80211.h"
 #include "rtnetlink.h"
 #include "udev.h"
@@ -21,6 +22,7 @@ int main(void) {
     UdevMonitor udev_monitor(event_loop);
     Nl80211 nl80211(event_loop);
     Rtnetlink rtnetlink(event_loop);
+    TimerManager timer_manager(event_loop);
 
 #define NEW_WIDGET(CLASS, VARNAME, ...) \
     CLASS VARNAME{__VA_ARGS__}; \
@@ -30,11 +32,11 @@ int main(void) {
     NEW_WIDGET(Widget_IP, widget_wlp3s0_ip, rtnetlink, "wlp3s0", "#008b8b");
     NEW_WIDGET(Widget_IP, widget_enp0s25_ip, rtnetlink, "enp0s25", "#8b8b00");
     NEW_WIDGET(Widget_nl80211, widget_wlp3s0, nl80211, rtnetlink, "wlp3s0");
-    NEW_WIDGET(WidgetMem, widget_mem, event_loop, 1000);
+    NEW_WIDGET(WidgetMem, widget_mem, timer_manager, 1000);
     NEW_WIDGET(WidgetAC, widget_ac, event_loop, udev_monitor, "AC");
-    NEW_WIDGET(WidgetWattage, widget_wattage, event_loop, {"BAT0", "BAT1"}, 2500);
-    NEW_WIDGET(WidgetBattery, widget_battery0, event_loop, "BAT0", 2500);
-    NEW_WIDGET(WidgetBattery, widget_battery1, event_loop, "BAT1", 2500);
+    NEW_WIDGET(WidgetWattage, widget_wattage, timer_manager, {"BAT0", "BAT1"}, 2500);
+    NEW_WIDGET(WidgetBattery, widget_battery0, timer_manager, "BAT0", 2500);
+    NEW_WIDGET(WidgetBattery, widget_battery1, timer_manager, "BAT1", 2500);
     NEW_WIDGET(Widget_Pulse, widget_pulse, event_loop, "1");
     NEW_WIDGET(WidgetTime, widget_time, event_loop);
 

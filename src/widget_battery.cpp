@@ -28,11 +28,10 @@ static float get_battery_level(int battery_dirfd) {
     return float(energy_now) / energy_full;
 }
 
-WidgetBattery::WidgetBattery(EventLoop &event_loop, const char *battery_name, unsigned long poll_interval_ms) {
+WidgetBattery::WidgetBattery(TimerManager &timer_manager, const char *battery_name, unsigned long poll_interval_ms) {
     this->battery_name = battery_name;
 
-    timerfd = create_timerfd(CLOCK_MONOTONIC, std::chrono::milliseconds(poll_interval_ms));
-    event_loop.add_fd(this, timerfd);
+    timer_manager.register_monotonic_listener(this, std::chrono::milliseconds(poll_interval_ms));
 
     update_string();
 }
@@ -65,7 +64,6 @@ const char * WidgetBattery::get_string(bool force_update) noexcept {
     return buffer;
 }
 
-void WidgetBattery::descriptor_ready() noexcept {
-    consume_timerfd(timerfd);
+void WidgetBattery::timer_ready() noexcept {
     update_string();
 }

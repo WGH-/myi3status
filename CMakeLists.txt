@@ -16,9 +16,13 @@ set(sources
     src/main.cpp
     src/cached_descriptors.cpp
     src/event_loop.cpp
+    src/timer.cpp
     src/signalfd.cpp
     src/utils.cpp
 )
+
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIRS})
 
 if (${WITH_ALSA})
     list(APPEND sources src/widget_alsa.cpp)
