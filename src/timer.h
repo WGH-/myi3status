@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <boost/container/flat_map.hpp>
+#include <boost/container/flat_set.hpp>
 
 class TimerListener {
 public:
@@ -13,11 +14,15 @@ public:
 
 class Timer : Epollable {
     int fd;
-    std::vector<TimerListener*> listeners;
+    boost::container::flat_set<TimerListener*> listeners;
+
+    EventLoop &event_loop;
+    const struct timespec interval;
 public:
     Timer(EventLoop &event_loop, const struct timespec &interval);
 
     void register_listener(TimerListener *listener);
+    void unregister_listener(TimerListener *listener);
 
     virtual void descriptor_ready() noexcept override;
 };
@@ -35,4 +40,6 @@ public:
     }
 
     void register_monotonic_listener(TimerListener *listener, const struct timespec &interval);
+
+    void unregister_monotonic_listener(TimerListener *listener);
 };

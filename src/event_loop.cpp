@@ -99,3 +99,10 @@ void EventLoop::add_fd(Epollable *epollable, int fd) noexcept {
     res = epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &event);
     assert(res == 0);
 }
+
+void EventLoop::remove_fd(int fd) noexcept {
+    int res;
+
+    res = epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, nullptr);
+    assert(res == 0);
+}

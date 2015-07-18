@@ -1,9 +1,9 @@
 #include "timer.h"
 
 Timer::Timer(EventLoop &event_loop, const struct timespec &interval)
+    : event_loop(event_loop), interval(interval)
 {
-    fd = create_timerfd(CLOCK_MONOTONIC, &interval);
-    event_loop.add_fd(this, fd);
+    fd = -1;
 }
 
 void Timer::descriptor_ready() noexcept
@@ -17,7 +17,23 @@ void Timer::descriptor_ready() noexcept
 
 void Timer::register_listener(TimerListener *listener)
 {
-    listeners.push_back(listener);
+    listeners.insert(listener);
+
+    if (fd == -1) {
+        fd = create_timerfd(CLOCK_MONOTONIC, &interval);
+        event_loop.add_fd(this, fd);
+    }
+}
+
+void Timer::unregister_listener(TimerListener *listener)
+{
+    listeners.erase(listener);
+
+    if (listeners.empty() && fd >= 0) {
+        event_loop.remove_fd(fd);
+        close(fd);
+        fd = -1;
+    }
 }
 
 TimerManager::TimerManager(EventLoop &event_loop)
@@ -45,4 +61,11 @@ void TimerManager::register_monotonic_listener(TimerListener *listener, const st
     }
 
     t->register_listener(listener);
+}
+
+void TimerManager::unregister_monotonic_listener(TimerListener *listener)
+{
+    for (auto it : timer_cache) {
+        it.second->unregister_listener(listener);
+    }
 }

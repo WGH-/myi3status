@@ -26,7 +26,7 @@ static int signal_level_from_rssi(int rssi, int levels)
     static const int MAX_RSSI = -65;
 
     if (rssi <= MIN_RSSI) {
-        return 0; 
+        return 0;
     } else if (rssi >= MAX_RSSI) {
         return levels-1;
     } else {
@@ -36,31 +36,34 @@ static int signal_level_from_rssi(int rssi, int levels)
     }
 }
 
-Widget_nl80211::Widget_nl80211(Nl80211 &nl80211, Rtnetlink &rtnetlink, const char *ifname)
-    : nl80211(nl80211), rtnetlink(rtnetlink)
+Widget_nl80211::Widget_nl80211(TimerManager &timer_manager, Nl80211 &nl80211, Rtnetlink &rtnetlink, const char *ifname, unsigned long signal_poll_interval_ms)
+    : timer_manager(timer_manager), nl80211(nl80211), rtnetlink(rtnetlink), signal_poll_interval_ms(signal_poll_interval_ms)
 {
     this->ifname = ifname;
-    
+
     nl80211.add_listener(this);
     rtnetlink.add_link_listener(this);
+
 
     update_string();
 }
 
-void Widget_nl80211::update_string(struct rtnl_link *link) noexcept {
+void Widget_nl80211::update_string() noexcept {
     rtnetlink.get_link_info(ifname, link_info);
     nl80211.get_interface_info(ifname, info);
 
     if (info.connected) {
         int level;
-        
+
         level = signal_level_from_rssi(info.signal_strength, sizeof(signal_strengths) / sizeof(signal_strengths[0]));
 
-        snprintf(string, sizeof(string), 
+        snprintf(string, sizeof(string),
             "{\"full_text\": \"%s %s\"}",
             signal_strengths[level],
             info.ssid_filtered
         );
+
+        timer_manager.register_monotonic_listener(this, std::chrono::milliseconds(signal_poll_interval_ms));
     } else {
         const char *status = "disconnected";
 
@@ -68,18 +71,23 @@ void Widget_nl80211::update_string(struct rtnl_link *link) noexcept {
             status = "down";
         }
 
-        snprintf(string, sizeof(string), 
+        snprintf(string, sizeof(string),
             "{"
                 "\"full_text\": \"(%s)\","
                 "\"color\": \"" DISCONNECTED_COLOR "\" "
             "}",
             status
         );
+
+        timer_manager.unregister_monotonic_listener(this);
     }
 }
 
 const char * Widget_nl80211::get_string(bool force_update) noexcept {
-    // no polling - no forced update
+    if (force_update && info.connected) {
+        // update signal strength
+        update_string();
+    }
     return string;
 }
 
@@ -103,7 +111,7 @@ void Widget_nl80211::nl80211event(struct nl_msg *msg) noexcept {
     }
 
     switch (gnlh->cmd) {
-        case NL80211_CMD_CONNECT: 
+        case NL80211_CMD_CONNECT:
         case NL80211_CMD_DISCONNECT:
         case NL80211_CMD_ROAM:
             update_string();
@@ -115,6 +123,17 @@ void Widget_nl80211::nl80211event(struct nl_msg *msg) noexcept {
 
 void Widget_nl80211::link_event(struct rtnl_link *link) noexcept {
     if (strcmp(rtnl_link_get_name(link), ifname) == 0) {
+        update_string();
+    }
+}
+
+void Widget_nl80211::timer_ready() noexcept {
+    /*
+     * The timer is used solely to poll signal level.
+     * If we aren't connected, don't do anything.
+     */
+
+    if (info.connected) {
         update_string();
     }
 }
