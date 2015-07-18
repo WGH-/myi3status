@@ -224,6 +224,10 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
     res = nl_recvmsgs(nl_info_sock, nl_info_cb);
     assert(res == 0);
 
+    nlmsg_free(msg);
+    msg = nlmsg_alloc();
+    assert(msg != 0);
+
     // if we found anything, request even more details
     if (info.connected) {
         genlmsg_put(msg, 0, 0, info_nl80211_id, 0,
