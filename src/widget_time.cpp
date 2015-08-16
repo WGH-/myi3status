@@ -115,4 +115,11 @@ void WidgetTime::InotifyListener::handle_event(const struct inotify_event *event
             }
         }
     }
+    if (event->wd == -1) {
+        if (event->mask & IN_Q_OVERFLOW) {
+            // inotify queue overflow: some events may have been lost
+            // update forcibly
+            widget_time.localtime_updated();
+        }
+    }
 }
