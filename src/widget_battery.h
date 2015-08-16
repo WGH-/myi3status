@@ -8,7 +8,7 @@ class WidgetBattery : public Widget, TimerListener {
     const char *battery_name;
 
     void update_string() noexcept;
-    char buffer[32];
+    char buffer[64];
 public:
     WidgetBattery(TimerManager &timer_manager, const char *battery_name, unsigned long poll_interval_ms);
     virtual const char* get_string(bool force_update) noexcept override;

@@ -51,7 +51,15 @@ void WidgetBattery::update_string() noexcept {
     }
 
     if (dirfd_battery >= 0) {
-        snprintf(buffer, sizeof(buffer), "{\"full_text\": \"%s: %3.0f%%\"}", battery_name, get_battery_level(dirfd_battery) * 100);
+        float battery_level = get_battery_level(dirfd_battery);
+        const char *color = "#FFFFFF";
+        if (battery_level < 0.105) {
+            color = "#FFFF00";
+        }
+        if (battery_level < 0.055) {
+            color = "#FF0000";
+        }
+        snprintf(buffer, sizeof(buffer), "{\"color\":\"%s\",\"full_text\": \"%s: %3.0f%%\"}", color, battery_name, battery_level * 100);
     }
 
     close(dirfd_battery);
