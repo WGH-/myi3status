@@ -14,7 +14,7 @@
 #include "utils.h"
 
 EventLoop::EventLoop() {
-    epoll_fd = epoll_create1(0);
+    epoll_fd = epoll_create1(EPOLL_CLOEXEC);
     check_fd(epoll_fd, "epoll_create1");
 
     force_next_update = false;
