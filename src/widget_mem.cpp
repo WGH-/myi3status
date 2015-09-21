@@ -41,8 +41,7 @@ void MemInfo::fill_meminfo(int fd)
     char buffer[2048];
     ssize_t n;
 
-    lseek(fd, 0, SEEK_SET);
-    n = read(fd, buffer, sizeof(buffer));
+    n = pread(fd, buffer, sizeof(buffer), 0);
     assert(n > 0);
     assert(n < sizeof(buffer));
     buffer[n] = '\0';
