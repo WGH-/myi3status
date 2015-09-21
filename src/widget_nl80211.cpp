@@ -8,11 +8,13 @@
 extern "C" char *if_indextoname (unsigned int __ifindex, char *__ifname);
 
 #include <linux/nl80211.h>
+#include <linux/if.h>
 
 #include <netlink/socket.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/ctrl.h>
 #include <netlink/route/link.h>
+
 
 #define DISCONNECTED_COLOR "#FF0000"
 
