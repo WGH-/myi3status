@@ -44,6 +44,7 @@ public:
         struct in_addr addr; 
     };
     void fill_addr_info(AddrInfo &info, struct rtnl_addr *addr = nullptr);
+    void fill_addr_info(AddrInfo &info, struct rtnl_link *link);
 
     // addr updates
     class AddrListener {

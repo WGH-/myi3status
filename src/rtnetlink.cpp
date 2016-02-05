@@ -119,8 +119,7 @@ void Rtnetlink::fill_addr_info(AddrInfo &info, struct rtnl_addr *addr)
         if (memcmp(&info.addr, ipv4, sizeof(info.addr)) == 0) {
             info.invalid = true;
         }
-    }
-    if (msgtype == RTM_NEWADDR) {
+    } else if (msgtype == RTM_NEWADDR) {
         if (!info.invalid && (ipv4->s_addr & 0x0000fea9) == 0x0000fea9) {
             // ignore zeroconf ipv4 addresses
             return;
@@ -128,6 +127,15 @@ void Rtnetlink::fill_addr_info(AddrInfo &info, struct rtnl_addr *addr)
 
         memcpy(&info.addr, ipv4, sizeof(info.addr));
         info.invalid = false;
+    }
+}
+
+void Rtnetlink::fill_addr_info(AddrInfo &info, struct rtnl_link *link)
+{
+    int msgtype = nl_object_get_msgtype((struct nl_object *) link);
+
+    if (msgtype == RTM_DELLINK) {
+        info.invalid = true;
     }
 }
 

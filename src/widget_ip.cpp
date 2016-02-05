@@ -17,6 +17,7 @@ Widget_IP::Widget_IP(Rtnetlink &rtnetlink, const char *ifname, const char *color
     this->color = color ? color : IP_DEFAULT_COLOR;
 
     rtnetlink.add_addr_listener(this);
+    rtnetlink.add_link_listener(this);
     rtnetlink.force_addr_update();
 
     update_string();
@@ -24,6 +25,10 @@ Widget_IP::Widget_IP(Rtnetlink &rtnetlink, const char *ifname, const char *color
 
 void Widget_IP::update_data(struct rtnl_addr *addr) noexcept {
     rtnetlink.fill_addr_info(addr_info, addr);
+}
+
+void Widget_IP::update_data(struct rtnl_link *link) noexcept {
+    rtnetlink.fill_addr_info(addr_info, link);
 }
 
 void Widget_IP::update_string() noexcept {
@@ -57,6 +62,13 @@ void Widget_IP::addr_event(struct rtnl_addr *addr) noexcept
 
     if (strcmp(ifname, this->ifname) == 0) {
         update_data(addr);
+        update_string();
+    }
+}
+
+void Widget_IP::link_event(struct rtnl_link *link) noexcept {
+    if (strcmp(rtnl_link_get_name(link), this->ifname) == 0) {
+        update_data(link);
         update_string();
     }
 }
