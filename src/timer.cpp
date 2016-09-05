@@ -8,6 +8,8 @@ Timer::Timer(EventLoop &event_loop, const struct timespec &interval)
 
 void Timer::descriptor_ready() noexcept
 {
+    assert(fd >= 0);
+
     consume_timerfd(fd);
 
     for (TimerListener *listener : listeners) {

@@ -29,6 +29,11 @@ SignalFd::SignalFd(EventLoop &event_loop, std::initializer_list<int> signals)
     event_loop.add_fd(this, fd);
 }
 
+SignalFd::~SignalFd()
+{
+    close(fd);
+}
+
 void SignalFd::descriptor_ready() noexcept
 {
     while (true) {
