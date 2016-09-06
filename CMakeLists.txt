@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0)
 
 project(myi3status)
 
+find_package(PkgConfig REQUIRED)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin")
 
 set(WITH_ALSA false CACHE BOOL "Enable ALSA support")
@@ -16,6 +18,7 @@ set(sources
     src/main.cpp
     src/cached_descriptors.cpp
     src/event_loop.cpp
+    src/click_manager.cpp
     src/timer.cpp
     src/signalfd.cpp
     src/utils.cpp
@@ -23,6 +26,11 @@ set(sources
 
 find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
+
+pkg_search_module(YAJL REQUIRED yajl)
+
+list(APPEND libraries ${YAJL_LIBRARIES})
+include_directories(${YAJL_INCLUDE_DIR})
 
 if (${WITH_ALSA})
     list(APPEND sources src/widget_alsa.cpp)

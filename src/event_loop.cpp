@@ -23,7 +23,7 @@ EventLoop::EventLoop() {
 void EventLoop::run() noexcept {
     std::array<struct epoll_event, MAX_EVENTS> events;
 
-    fputs("{\"version\":1}\n", stdout);
+    fputs("{\"version\":1, \"click_events\": true}\n", stdout);
     fputs("[\n", stdout); // start of infinite list
 
     // always print the first "update" immediately

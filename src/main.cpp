@@ -16,6 +16,8 @@
 #include "widget_pulse.h"
 #include "widget_mem.h"
 
+#include "click_manager.h"
+
 int main(void) {
     EventLoop event_loop;
 
@@ -23,6 +25,7 @@ int main(void) {
     Nl80211 nl80211(event_loop);
     Rtnetlink rtnetlink(event_loop);
     TimerManager timer_manager(event_loop);
+    ClickManager click_manager(event_loop);
 
 #define NEW_WIDGET(CLASS, VARNAME, ...) \
     CLASS VARNAME{__VA_ARGS__}; \
