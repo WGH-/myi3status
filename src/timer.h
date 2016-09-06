@@ -36,7 +36,7 @@ public:
     template<typename T>
     void register_monotonic_listener(TimerListener *listener, T interval)
     {
-        register_monotonic_listener(listener, chrono_to_timespec(interval));
+        register_monotonic_listener(listener, duration_to_timespec(interval));
     }
 
     void register_monotonic_listener(TimerListener *listener, const struct timespec &interval);

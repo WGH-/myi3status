@@ -5,7 +5,7 @@
 int create_timerfd_inner(int clockid, const struct timespec *interval, const struct timespec *value, bool absolute);
 
 template<typename T>
-struct timespec chrono_to_timespec(T value)
+struct timespec duration_to_timespec(T value)
 {
     using namespace std::chrono;
 
@@ -21,9 +21,15 @@ struct timespec chrono_to_timespec(T value)
 }
 
 template<typename T>
+struct timespec timepoint_to_timespec(T value)
+{
+    return duration_to_timespec(value.time_since_epoch());
+}
+
+template<typename T>
 int create_timerfd(int clockid, T interval, T value, bool absolute) {
-    struct timespec interval2 = chrono_to_timespec(interval),
-                    value2 = chrono_to_timespec(value);
+    struct timespec interval2 = duration_to_timespec(interval),
+                    value2 = duration_to_timespec(value);
 
     return create_timerfd_inner(clockid, &interval2, &value2, absolute);
 }

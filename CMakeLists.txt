@@ -20,6 +20,7 @@ set(sources
     src/event_loop.cpp
     src/click_manager.cpp
     src/timer.cpp
+    src/timer_oneshot.cpp
     src/signalfd.cpp
     src/utils.cpp
 )

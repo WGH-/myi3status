@@ -3,6 +3,7 @@
 
 #include "event_loop.h"
 #include "timer.h"
+#include "timer_oneshot.h"
 #include "nl80211.h"
 #include "rtnetlink.h"
 #include "udev.h"
@@ -25,6 +26,7 @@ int main(void) {
     Nl80211 nl80211(event_loop);
     Rtnetlink rtnetlink(event_loop);
     TimerManager timer_manager(event_loop);
+    OneshotTimerManager oneshot_timer_manager(event_loop);
     ClickManager click_manager(event_loop);
 
 #define NEW_WIDGET(CLASS, VARNAME, ...) \
