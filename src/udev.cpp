@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#define UDEV_MONITOR_RECV_BUFFER (128 * 1024 * 1024)
+#define UDEV_MONITOR_RECV_BUFFER (4 * 1024)
 
 UdevMonitor::UdevMonitor(EventLoop &event_loop)
 {
