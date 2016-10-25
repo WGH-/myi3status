@@ -24,24 +24,37 @@ void OneshotTimerManager::descriptor_ready()
     check_queue();
 }
 
-void OneshotTimerManager::schedule_after(clock_t::duration dt, OneshotTimerListener *listener)
+TimerHandle* OneshotTimerManager::schedule_after(clock_t::duration dt, OneshotTimerListener *listener)
 {
     auto expiration = clock_t::now() + dt;
+    TimerHandle *timer_handle = new TimerHandle(listener);
 
-    queue.emplace(expiration, listener);
+    queue.emplace(expiration, std::unique_ptr<TimerHandle>(timer_handle));
 
     check_queue();
 
+    return timer_handle;
 }
 
 void OneshotTimerManager::check_queue()
 {
     auto now = clock_t::now();
 
-    while (!queue.empty() && now >= queue.top().first) {
-        auto expired = queue.top();
-        expired.second->oneshot_timer_ready();
-        queue.pop();
+    while (!queue.empty()) {
+        if (queue.top().second->is_cancelled) {
+            queue.pop();
+            continue;
+        }
+
+        if (now >= queue.top().first) {
+            auto &expired = queue.top();
+            expired.second->listener->oneshot_timer_ready();
+            queue.pop();
+            continue;
+        }
+
+        break;
+
     }
 
     struct itimerspec new_val;

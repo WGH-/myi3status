@@ -4,6 +4,7 @@
 #include "utils.h"
 
 #include <queue>
+#include <memory>
 
 /*
  * XXX assumes std::chrono::steady_clock is backed by CLOCK_MONOTONIC
@@ -12,6 +13,23 @@
 class OneshotTimerListener {
 public:
     virtual void oneshot_timer_ready() noexcept = 0;
+};
+
+class OneshotTimerManager;
+
+class TimerHandle {
+    OneshotTimerListener *listener;
+    bool is_cancelled;
+
+    TimerHandle(OneshotTimerListener *listener)
+        : listener(listener), is_cancelled(false)
+    {}
+
+    friend class OneshotTimerManager;
+public:
+    void cancel() {
+        is_cancelled = true;
+    }
 };
 
 class OneshotTimerManager : Epollable {
@@ -23,16 +41,16 @@ public:
 
     virtual void descriptor_ready() noexcept override;
 
-    void schedule_after(struct timespec *it_value, OneshotTimerListener *);
+    TimerHandle* schedule_after(struct timespec *it_value, OneshotTimerListener *);
 
-    void schedule_after(clock_t::duration dt, OneshotTimerListener *listener);
+    TimerHandle* schedule_after(clock_t::duration dt, OneshotTimerListener *listener);
 
 protected:
     int fd;
 
     typedef std::pair<
         std::chrono::steady_clock::time_point,
-        OneshotTimerListener *
+        std::unique_ptr<TimerHandle>
     > queue_entry_t;
 
     std::priority_queue<

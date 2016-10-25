@@ -40,10 +40,15 @@ static void get_sink_volume_callback(
 }
 
 Widget_Pulse::Widget_Pulse(EventLoop &event_loop,
+                           OneshotTimerManager &oneshot_timer_manager,
                            const char *sink_name)
+    : oneshot_timer_manager(oneshot_timer_manager)
 {
     this->sink_name = sink_name;
 
+    last_timer = nullptr;
+
+    hide_widget = true;
     volume = PA_VOLUME_INVALID;
     update_string();
 
@@ -159,7 +164,7 @@ void Widget_Pulse::update_string() noexcept
 {
     pa_volume_t volume = this->volume;
 
-    if (PA_VOLUME_IS_VALID(volume)) {
+    if (!hide_widget && PA_VOLUME_IS_VALID(volume)) {
         char volume_string[PA_VOLUME_SNPRINT_MAX];
         pa_volume_snprint(volume_string, sizeof(volume_string), volume);
 
@@ -188,6 +193,23 @@ void Widget_Pulse::descriptor_ready() noexcept
         return;
     }
 
+    if (last_timer != nullptr) {
+        last_timer->cancel();
+        last_timer = nullptr;
+    }
+
+    // this only happens when volume is changed
+    last_timer = oneshot_timer_manager.schedule_after(std::chrono::seconds(1), this);
+    hide_widget = false;
+
     update_string();
 }
 
+/*
+ * One-shot timer
+ */
+void Widget_Pulse::oneshot_timer_ready() noexcept {
+    hide_widget = true;
+    last_timer = nullptr;
+    update_string();
+}
