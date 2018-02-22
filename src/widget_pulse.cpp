@@ -139,9 +139,11 @@ void Widget_Pulse::get_sink_volume_callback(
     assert(is_last == 0);
     assert(i != nullptr);
 
-    this->volume = pa_cvolume_avg(&i->volume);
-
-    notify_eventfd();
+    auto new_volume = pa_cvolume_avg(&i->volume);
+    if (new_volume != this->volume) {
+        this->volume = new_volume;
+        notify_eventfd();
+    }
 }
 
 void Widget_Pulse::update_volume(pa_context *c)
