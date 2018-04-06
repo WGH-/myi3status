@@ -1,5 +1,7 @@
 #include "timer.h"
 
+#include <tuple>
+
 Timer::Timer(EventLoop &event_loop, const struct timespec &interval)
     : event_loop(event_loop), interval(interval)
 {
