@@ -46,7 +46,11 @@ void WidgetWattage::update_string() noexcept {
         power_now += get_wattage(battery_name.c_str());
     }
 
-    snprintf(buffer, sizeof(buffer), "{\"full_text\": \"%.1lf W\"}", power_now / 1000.0 / 1000.0);
+    if (power_now == 0) {
+        buffer[0] = '\0';
+    } else {
+        snprintf(buffer, sizeof(buffer), "{\"full_text\": \"%.1lf W\"}", power_now / 1000.0 / 1000.0);
+    }
 }
 
 const char * WidgetWattage::get_string(bool force_update) noexcept {
