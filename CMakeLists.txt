@@ -28,6 +28,10 @@ set(sources
 find_package(Boost)
 include_directories(${Boost_INCLUDE_DIRS})
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+list(APPEND libraries Threads::Threads)
+
 pkg_search_module(YAJL REQUIRED yajl)
 
 list(APPEND libraries ${YAJL_LIBRARIES})
