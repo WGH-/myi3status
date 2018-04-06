@@ -42,7 +42,7 @@ int main(void) {
     NEW_WIDGET(WidgetWattage, widget_wattage, timer_manager, {"BAT0", "BAT1"}, 2500);
     NEW_WIDGET(WidgetBattery, widget_battery0, timer_manager, "BAT0", 2500);
     NEW_WIDGET(WidgetBattery, widget_battery1, timer_manager, "BAT1", 2500);
-    NEW_WIDGET(Widget_Pulse, widget_pulse, event_loop, oneshot_timer_manager, "alsa_output.pci-0000_00_1b.0.analog-stereo");
+    NEW_WIDGET(Widget_Pulse, widget_pulse, event_loop, oneshot_timer_manager, "@DEFAULT_SINK@");
     NEW_WIDGET(WidgetTime, widget_time, event_loop);
 
     event_loop.run();
