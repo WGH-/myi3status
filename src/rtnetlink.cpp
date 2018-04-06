@@ -89,7 +89,12 @@ void Rtnetlink::get_link_info(const char *ifname, LinkInfo &info, struct rtnl_li
 
     if (link == nullptr) {
         res = rtnl_link_get_kernel(nl_info_sock, -1, ifname, &link);
-        assert(res >= 0);
+        if (res < 0) {
+            if (res == -NLE_OBJ_NOTFOUND) {
+                fprintf(stderr, "Link %s not found\n", ifname);
+            }
+            return;
+        }
         borrowed_reference = false;
     } else {
         borrowed_reference = true;

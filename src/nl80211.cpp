@@ -206,7 +206,10 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
     info.connected = false;
 
     dev_idx = if_nametoindex(ifname);
-    assert(dev_idx != 0);
+    if (dev_idx == 0) {
+        // TODO return proper error somehow
+        return;
+    }
 
     msg = nlmsg_alloc();
     assert(msg != 0);
@@ -222,7 +225,11 @@ void Nl80211::get_interface_info(const char *ifname, struct InterfaceInfo &info)
     assert(res >= 0);
 
     res = nl_recvmsgs(nl_info_sock, nl_info_cb);
-    assert(res == 0);
+    if (res != 0) {
+        fprintf(stderr, "Failed to nl_recvmsgs: %d\n", res);
+        nlmsg_free(msg);
+        return;
+    }
 
     nlmsg_free(msg);
     msg = nlmsg_alloc();
