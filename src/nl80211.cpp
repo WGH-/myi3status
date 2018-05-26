@@ -86,6 +86,18 @@ static void handle_info_bss(struct nlattr **tb, Nl80211::InterfaceInfo &info)
     info.connected = true;
 }
 
+static uint32_t get_bitrate(struct nlattr *bitrate_attr) {
+    struct nlattr *rinfo[NL80211_RATE_INFO_MAX + 1];
+
+    int res;
+
+    res = nla_parse_nested(rinfo, NL80211_RATE_INFO_MAX, bitrate_attr, rate_policy);
+    assert(res == 0);
+
+    // * @NL80211_RATE_INFO_BITRATE32: total bitrate (u32, 100kbit/s)
+    return nla_get_u32(rinfo[NL80211_RATE_INFO_BITRATE32]);
+}
+
 static void handle_info_sta(struct nlattr **tb, Nl80211::InterfaceInfo &info) {
     struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
     int res;
@@ -95,8 +107,17 @@ static void handle_info_sta(struct nlattr **tb, Nl80211::InterfaceInfo &info) {
     assert(res == 0);
 
     info.signal_strength = 0;
+    info.rx_bitrate = 0;
+    info.tx_bitrate = 0;
+
     if (sinfo[NL80211_STA_INFO_SIGNAL]) {
         info.signal_strength = (int8_t) nla_get_u8(sinfo[NL80211_STA_INFO_SIGNAL]);
+    }
+    if (sinfo[NL80211_STA_INFO_RX_BITRATE]) {
+        info.rx_bitrate = get_bitrate(sinfo[NL80211_STA_INFO_RX_BITRATE]);
+    }
+    if (sinfo[NL80211_STA_INFO_TX_BITRATE]) {
+        info.tx_bitrate = get_bitrate(sinfo[NL80211_STA_INFO_TX_BITRATE]);
     }
 }
 

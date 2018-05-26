@@ -4,6 +4,7 @@
 #include <netlink/genl/genl.h>
 
 // only C supports designated initializers, so we put them here
+// (taken from iw source code)
 
 const struct nla_policy sta_policy[NL80211_STA_INFO_MAX + 1] = {
     [NL80211_STA_INFO_INACTIVE_TIME] = { .type = NLA_U32 },
@@ -28,4 +29,12 @@ const struct nla_policy bss_policy[NL80211_BSS_MAX + 1] = {
     [NL80211_BSS_SIGNAL_MBM] = { .type = NLA_U32 },
     [NL80211_BSS_SIGNAL_UNSPEC] = { .type = NLA_U8 },
     [NL80211_BSS_STATUS] = { .type = NLA_U32 },
+};
+
+const struct nla_policy rate_policy[NL80211_RATE_INFO_MAX + 1] = {
+    [NL80211_RATE_INFO_BITRATE] = { .type = NLA_U16 },
+    [NL80211_RATE_INFO_BITRATE32] = { .type = NLA_U32 },
+    [NL80211_RATE_INFO_MCS] = { .type = NLA_U8 },
+    [NL80211_RATE_INFO_40_MHZ_WIDTH] = { .type = NLA_FLAG },
+    [NL80211_RATE_INFO_SHORT_GI] = { .type = NLA_FLAG },
 };

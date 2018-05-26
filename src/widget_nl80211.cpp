@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <cctype>
 
+#include <inttypes.h>
+
 // XXX hack (netlink/route/link.h conflicts with net/if.h)
 extern "C" char *if_indextoname (unsigned int __ifindex, char *__ifname);
 
@@ -71,16 +73,20 @@ void Widget_nl80211::update_string() noexcept {
 
         if (expanded_view) {
             snprintf(string, sizeof(string),
-                "{\"full_text\": \"%s %s\", \"name\":\"%s\", \"instance\":\"%s\"}",
+                "{\"full_text\": \"%s(↓%" PRIu32 "/↑%" PRIu32 " Mbit/s) %s\", \"name\":\"%s\", \"instance\":\"%s\"}",
                 signal_strengths[level],
+                info.rx_bitrate/10,
+                info.tx_bitrate/10,
                 info.ssid_filtered,
                 clickable_name(),
                 clickable_instance()
             );
         } else {
             snprintf(string, sizeof(string),
-                "{\"full_text\": \"%s\", \"name\":\"%s\", \"instance\":\"%s\"}",
+                "{\"full_text\": \"%s(%" PRIu32"/%" PRIu32 ")\", \"name\":\"%s\", \"instance\":\"%s\"}",
                 signal_strengths[level],
+                info.rx_bitrate/10,
+                info.tx_bitrate/10,
                 clickable_name(),
                 clickable_instance()
             );

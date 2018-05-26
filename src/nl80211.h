@@ -13,6 +13,7 @@
 extern "C" {
     extern struct nla_policy sta_policy[NL80211_STA_INFO_MAX + 1];
     extern struct nla_policy bss_policy[NL80211_BSS_MAX + 1];
+    extern struct nla_policy rate_policy[NL80211_RATE_INFO_MAX + 1];
 }
 
 class Nl80211Listener {
@@ -50,6 +51,9 @@ public:
         char ssid_filtered[64]; // null-terminated ssid with nonprintable chars removed
 
         int signal_strength;
+
+        // in 100 kbit/s, as in NL80211_RATE_INFO_BITRATE32
+        uint32_t rx_bitrate, tx_bitrate;
     };
         
     Nl80211(EventLoop &event_loop);
