@@ -1,6 +1,9 @@
 #include "event_loop.h"
 
-#define MAX_EVENTS 8
+// N.B. read one event as a time to prevent bugs
+// such as an object being destroyed by some event
+// while the object's event is pending
+#define MAX_EVENTS 1
 
 #include <array>
 
