@@ -11,6 +11,8 @@ enum i3bar_parse_state {
     I3BAR_STATE_NONE = 0,
     I3BAR_STATE_ARRAY,
     I3BAR_STATE_OBJECT,
+
+    I3BAR_STATE_UNSUPPORTED_KEY,
 };
 
 enum i3bar_json_key {
@@ -37,6 +39,8 @@ struct i3bar_parse_ctx {
 
     const char *errstring;
 
+    int unsupported_recursion_level;
+
     ClickManager *object;
 };
 
@@ -44,17 +48,29 @@ static int handle_gnull(void * p)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
 
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        return 1;
+    }
+
     return 1;
 }
 static int handle_gboolean(void * p, int boolean)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
 
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        return 1;
+    }
+
     return 1;
 }
 static int handle_glong(void * p, long long val)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
+
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        return 1;
+    }
 
     if (ctx->state == I3BAR_STATE_NONE) {
         ctx->errstring = "Unexpected top-level number";
@@ -90,6 +106,10 @@ static int handle_gstring(void * p, const unsigned char * stringVal,
                            size_t stringLen)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
+
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        return 1;
+    }
 
     if (ctx->state == I3BAR_STATE_NONE) {
         ctx->errstring = "Unexpected top-level string";
@@ -128,6 +148,14 @@ static int handle_gmap_key(void * p, const unsigned char * stringVal,
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
 
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        if (ctx->unsupported_recursion_level > 0) {
+            return 1;
+        } else {
+            ctx->state = I3BAR_STATE_OBJECT;
+        }
+    }
+
     assert(ctx->state == I3BAR_STATE_OBJECT);
 
     if (strncmp((const char *)stringVal, "name", stringLen) == 0) {
@@ -141,7 +169,8 @@ static int handle_gmap_key(void * p, const unsigned char * stringVal,
     } else if (strncmp((const char *)stringVal, "y", stringLen) == 0) {
         ctx->current_key = I3BAR_KEY_Y;
     } else {
-        ctx->current_key = I3BAR_KEY_UNKNOWN;
+        ctx->state = I3BAR_STATE_UNSUPPORTED_KEY;
+        ctx->unsupported_recursion_level = 0;
     }
 
     return 1;
@@ -149,6 +178,11 @@ static int handle_gmap_key(void * p, const unsigned char * stringVal,
 static int handle_gstart_map(void * p)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
+
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        ctx->unsupported_recursion_level++;
+        return 1;
+    }
 
     if (ctx->state == I3BAR_STATE_NONE) {
         ctx->errstring = "Unexpected top-most object";
@@ -176,7 +210,12 @@ static int handle_gend_map(void * p)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
 
-    assert(ctx->state == I3BAR_STATE_OBJECT);
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY && ctx->unsupported_recursion_level > 0) {
+        ctx->unsupported_recursion_level--;
+        return 1;
+    }
+
+    assert(ctx->state == I3BAR_STATE_OBJECT || ctx->state == I3BAR_STATE_UNSUPPORTED_KEY);
 
     ctx->state = I3BAR_STATE_ARRAY;
 
@@ -197,6 +236,11 @@ static int handle_gstart_array(void * p)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
 
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        ctx->unsupported_recursion_level++;
+        return 1;
+    }
+
     if (ctx->state != I3BAR_STATE_NONE) {
         ctx->errstring = "Unexpected nested array";
         return 0;
@@ -209,6 +253,12 @@ static int handle_gstart_array(void * p)
 static int handle_gend_array(void * p)
 {
     auto ctx = (struct i3bar_parse_ctx *) p;
+
+    if (ctx->state == I3BAR_STATE_UNSUPPORTED_KEY) {
+        ctx->unsupported_recursion_level--;
+        assert(ctx->unsupported_recursion_level >= 0);
+        return 1;
+    }
 
     assert(ctx->state == I3BAR_STATE_ARRAY);
 
@@ -288,7 +338,8 @@ void ClickManager::read_input()
         stat = yajl_parse(hand, (const unsigned char *)buffer, res);
 
         if (stat == yajl_status_client_canceled) {
-            fprintf(stderr, "Client aborted\n");
+            auto ctx = (struct i3bar_parse_ctx *) private_data;
+            fprintf(stderr, "Client aborted: errstring=%s\n", ctx->errstring ? ctx->errstring : "(null)");
             exit(1);
         }
 
